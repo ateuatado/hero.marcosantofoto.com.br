@@ -12,7 +12,7 @@ class Hero extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'sport', 'slug'];
+    protected $allowedFields    = ['name', 'sport', 'slug', 'cover_photo_id', 'published'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

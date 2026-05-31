@@ -9,58 +9,77 @@ $routes->get('/', 'Home::index');
 
 service('auth')->routes($routes);
 
-// Admin Routes
+// ─── Admin Routes ─────────────────────────────────────────────────────────────
 $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function ($routes) {
     $routes->get('/', 'Admin\Dashboard::index');
-    // Photos
-    $routes->get('heroes/(:num)/photos', 'Admin\HeroController::photos/$1');
-    $routes->post('heroes/(:num)/photos', 'Admin\HeroController::uploadPhoto/$1');
-    $routes->post('heroes/(:num)/photos/order', 'Admin\HeroController::updatePhotoOrder/$1');
-    $routes->post('heroes/photos/(:num)/delete', 'Admin\HeroController::deletePhoto/$1');
-    
-    // CTA
-    $routes->get('heroes/(:num)/cta', 'Admin\HeroController::cta/$1');
-    $routes->post('heroes/(:num)/cta', 'Admin\HeroController::updateCta/$1');
 
-    // Scheduling
-    $routes->get('heroes/(:num)/schedule', 'Admin\ScheduleController::index/$1');
-    $routes->post('heroes/(:num)/schedule', 'Admin\ScheduleController::store/$1');
-    $routes->post('heroes/(:num)/schedule/bulk', 'Admin\ScheduleController::bulk/$1');
-    $routes->post('schedules/(:num)/delete', 'Admin\ScheduleController::delete/$1');
+    // Photos (heróis)
+    $routes->get( 'heroes/(:num)/photos',              'Admin\HeroController::photos/$1');
+    $routes->post('heroes/(:num)/photos',              'Admin\HeroController::uploadPhoto/$1');
+    $routes->post('heroes/(:num)/photos/order',        'Admin\HeroController::updatePhotoOrder/$1');
+    $routes->post('heroes/photos/(:num)/delete',       'Admin\HeroController::deletePhoto/$1');
+    $routes->post('heroes/(:num)/photos/(:num)/cover', 'Admin\HeroController::setCover/$1/$2');
 
-    // Intentions
-    $routes->get('intentions', 'Admin\IntentionController::index');
+    // Publicação
+    $routes->post('heroes/(:num)/publish',   'Admin\HeroController::publish/$1');
+    $routes->post('heroes/(:num)/unpublish', 'Admin\HeroController::unpublish/$1');
+
+    // CTA & Landing Page Blocks
+    $routes->get( 'heroes/(:num)/cta',                      'Admin\HeroController::cta/$1');
+    $routes->post('heroes/(:num)/cta',                      'Admin\HeroController::updateCta/$1');
+    $routes->post('heroes/(:num)/cta/blocks',               'Admin\HeroController::ctaBlockCreate/$1');
+    $routes->post('heroes/(:num)/cta/blocks/(:num)',         'Admin\HeroController::ctaBlockUpdate/$1/$2');
+    $routes->post('heroes/(:num)/cta/blocks/(:num)/delete',  'Admin\HeroController::ctaBlockDelete/$1/$2');
+    $routes->post('heroes/(:num)/cta/blocks/order',          'Admin\HeroController::ctaBlocksOrder/$1');
+
+    // Agendamento (por herói)
+    $routes->get( 'heroes/(:num)/schedule',       'Admin\ScheduleController::index/$1');
+    $routes->post('heroes/(:num)/schedule',       'Admin\ScheduleController::store/$1');
+    $routes->post('heroes/(:num)/schedule/bulk',  'Admin\ScheduleController::bulk/$1');
+    $routes->post('schedules/(:num)/delete',      'Admin\ScheduleController::delete/$1');
+
+    // Intenções
+    $routes->get( 'intentions',              'Admin\IntentionController::index');
     $routes->post('intentions/(:num)/delete', 'Admin\IntentionController::delete/$1');
 
-    // Hero CRUD
-    $routes->resource('heroes', ['controller' => 'Admin\HeroController', 'websafe' => 1]);
-
-    // Global Bookings
-    $routes->get('bookings', 'Admin\BookingController::index');
+    // Bookings globais
+    $routes->get( 'bookings',              'Admin\BookingController::index');
     $routes->post('bookings/(:num)/delete', 'Admin\BookingController::delete/$1');
-    // Packages
+
+    // Pacotes
     $routes->resource('packages', ['controller' => 'Admin\PackageController', 'websafe' => 1]);
 
-    // Client Projects
+    // Projetos de clientes + sync S3
     $routes->resource('client-projects', ['controller' => 'Admin\ClientProjectController', 'websafe' => 1]);
-    $routes->get('client-projects/(:num)/photos', 'Admin\ClientProjectController::photos/$1');
-    $routes->post('client-projects/(:num)/sync-s3', 'Admin\ClientProjectController::syncS3/$1');
+    $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
+    $routes->post('client-projects/(:num)/sync-s3',  'Admin\ClientProjectController::syncS3/$1');
+
+    // Hero CRUD (resource por último para não sobrescrever rotas acima)
+    $routes->resource('heroes', ['controller' => 'Admin\HeroController', 'websafe' => 1]);
 });
 
-// Public Intentions
+// ─── Agenda Proxy (resolve CORS/SSL server-side) ──────────────────────────────
+$routes->get( 'agenda-api/availability', 'AgendaProxy::availability');
+$routes->post('agenda-api/book',         'AgendaProxy::book');
+
+// ─── Intenções públicas ────────────────────────────────────────────────────────
 $routes->post('intentions/store', 'IntentionController::store');
 
-// Public Scheduling
-$routes->get('schedule/slots/(:num)', 'ScheduleController::getSlots/$1');
-$routes->post('schedule/book', 'ScheduleController::book');
+// ─── Agendamento público ───────────────────────────────────────────────────────
+$routes->get( 'schedule/slots/(:num)', 'ScheduleController::getSlots/$1');
+$routes->post('schedule/book',         'ScheduleController::book');
 
-// Client Portal (Requires Auth, role: client/jogador in this project context - using default auth filter)
+// ─── Portal do Cliente (autenticado) ──────────────────────────────────────────
 $routes->group('client', ['filter' => 'session'], static function ($routes) {
-    $routes->get('galeria', 'Client\GaleriaController::index');
-    $routes->get('galeria/(:num)', 'Client\GaleriaController::view/$1');
-    $routes->post('galeria/(:num)/save', 'Client\GaleriaController::saveSelection/$1');
-    $routes->get('galeria/(:num)/checkout', 'Client\GaleriaController::checkout/$1');
+    $routes->get( 'galeria',                       'Client\GaleriaController::index');
+    $routes->get( 'galeria/(:num)',                'Client\GaleriaController::view/$1');
+    $routes->post('galeria/(:num)/save',           'Client\GaleriaController::saveSelection/$1');
+    $routes->get( 'galeria/(:num)/checkout',       'Client\GaleriaController::checkout/$1');
 });
 
-// Front-end hero page by slug (Must be last so it doesn't override admin or auth routes)
+// ─── Landing page de copy — /{slug}/agendar ───────────────────────────────────
+// Deve vir ANTES do catch-all de slug
+$routes->get('(:segment)/agendar', 'LandingPage::view/$1');
+
+// ─── Página pública do herói por slug (catch-all — deve ser a última) ─────────
 $routes->get('(:segment)', 'HeroPage::view/$1', ['priority' => 99]);

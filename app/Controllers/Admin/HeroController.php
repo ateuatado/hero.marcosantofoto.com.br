@@ -125,14 +125,60 @@ class HeroController extends BaseController
         return redirect()->back()->with('message', 'Foto excluída.');
     }
 
+    public function setCover($heroId, $photoId)
+    {
+        $hero = $this->heroModel->find($heroId);
+        if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+
+        // Garante que a foto pertence ao herói
+        $photoModel = new \App\Models\Photo();
+        $photo = $photoModel->where('id', $photoId)->where('hero_id', $heroId)->first();
+        if (!$photo) {
+            return redirect()->back()->with('error', 'Foto não encontrada.');
+        }
+
+        $this->heroModel->update($heroId, ['cover_photo_id' => $photoId]);
+        return redirect()->back()->with('message', 'Foto de capa definida com sucesso!');
+    }
+
+    public function publish($heroId)
+    {
+        $hero = $this->heroModel->find($heroId);
+        if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+
+        $this->heroModel->update($heroId, ['published' => 1]);
+
+        $log = new \App\Models\HeroPublicationLog();
+        $log->log((int) $heroId, 'published', 'Publicado manualmente pelo painel.');
+
+        return redirect()->to(site_url('admin/heroes'))->with('message', "✅ Ensaio de {$hero['name']} publicado.");
+    }
+
+    public function unpublish($heroId)
+    {
+        $hero = $this->heroModel->find($heroId);
+        if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+
+        $reason = $this->request->getPost('reason') ?? '';
+
+        $this->heroModel->update($heroId, ['published' => 0]);
+
+        $log = new \App\Models\HeroPublicationLog();
+        $log->log((int) $heroId, 'unpublished', $reason ?: 'Sem motivo informado.');
+
+        return redirect()->to(site_url('admin/heroes'))->with('message', "⏸ Ensaio de {$hero['name']} despublicado.");
+    }
+
     public function cta($heroId)
     {
         $hero = $this->heroModel->find($heroId);
         if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
 
-        $ctaModel = new \App\Models\Cta();
-        $data['hero'] = $hero;
-        $data['cta'] = $ctaModel->where('hero_id', $heroId)->first();
+        $ctaModel   = new \App\Models\Cta();
+        $blockModel = new \App\Models\CtaBlock();
+        $data['hero']   = $hero;
+        $data['cta']    = $ctaModel->where('hero_id', $heroId)->first();
+        $data['blocks'] = $data['cta'] ? $blockModel->blocksForCta((int)$data['cta']['id']) : [];
 
         return view('admin/heroes/cta', $data);
     }
@@ -144,7 +190,6 @@ class HeroController extends BaseController
 
         $data = [
             'hero_id' => $heroId,
-            'type' => $this->request->getPost('type'),
             'title' => $this->request->getPost('title'),
             'description' => $this->request->getPost('description'),
             'button_text' => $this->request->getPost('button_text'),
@@ -156,6 +201,117 @@ class HeroController extends BaseController
         }
 
         $ctaModel->save($data);
-        return redirect()->to(site_url('admin/heroes'))->with('message', 'CTA atualizado com sucesso.');
+        return redirect()->to(site_url('admin/heroes/' . $heroId . '/cta'))->with('message', 'CTA salvo com sucesso.');
+    }
+
+    // ----------------------------------------------------------------
+    // CTA Blocks
+    // ----------------------------------------------------------------
+
+    public function ctaBlockCreate($heroId)
+    {
+        $cta = $this->_ensureCta($heroId);
+        $type    = $this->request->getPost('type');
+        $content = $this->_extractBlockContent($type);
+
+        // Upload de imagem se houver
+        $content = $this->_handleBlockImageUpload($content);
+
+        $blockModel = new \App\Models\CtaBlock();
+        $maxOrder = $blockModel->where('cta_id', $cta['id'])->selectMax('display_order')->first();
+        $order = (int)($maxOrder['display_order'] ?? 0) + 1;
+        $blockModel->saveBlock((int)$cta['id'], $type, $content, $order);
+
+        return redirect()->to(site_url('admin/heroes/' . $heroId . '/cta'))->with('message', 'Bloco adicionado.');
+    }
+
+    public function ctaBlockUpdate($heroId, $blockId)
+    {
+        $blockModel = new \App\Models\CtaBlock();
+        $block = $blockModel->find($blockId);
+        if (!$block) return redirect()->back()->with('error', 'Bloco não encontrado.');
+
+        $existing = is_string($block['content']) ? json_decode($block['content'], true) ?? [] : [];
+        $content  = $this->_extractBlockContent($block['type']);
+        $content  = $this->_handleBlockImageUpload($content, $existing);
+
+        $blockModel->updateBlock((int)$blockId, $content);
+        return redirect()->to(site_url('admin/heroes/' . $heroId . '/cta'))->with('message', 'Bloco atualizado.');
+    }
+
+    public function ctaBlockDelete($heroId, $blockId)
+    {
+        $blockModel = new \App\Models\CtaBlock();
+        $block = $blockModel->find($blockId);
+        if ($block) {
+            // Remove arquivo de imagem se houver
+            $c = is_string($block['content']) ? json_decode($block['content'], true) ?? [] : [];
+            foreach (['image_path'] as $field) {
+                if (!empty($c[$field]) && file_exists(FCPATH . $c[$field])) {
+                    @unlink(FCPATH . $c[$field]);
+                }
+            }
+            $blockModel->delete($blockId);
+        }
+        return redirect()->to(site_url('admin/heroes/' . $heroId . '/cta'))->with('message', 'Bloco removido.');
+    }
+
+    public function ctaBlocksOrder($heroId)
+    {
+        $order = $this->request->getJSON(true)['order'] ?? [];
+        $blockModel = new \App\Models\CtaBlock();
+        foreach ($order as $i => $id) {
+            $blockModel->update((int)$id, ['display_order' => $i]);
+        }
+        return $this->response->setJSON(['success' => true]);
+    }
+
+    // ----------------------------------------------------------------
+    // Helpers privados
+    // ----------------------------------------------------------------
+
+    private function _ensureCta(int $heroId): array
+    {
+        $ctaModel = new \App\Models\Cta();
+        $cta = $ctaModel->where('hero_id', $heroId)->first();
+        if (!$cta) {
+            $ctaModel->insert(['hero_id' => $heroId, 'title' => '', 'description' => '', 'button_text' => '', 'button_url' => '']);
+            $cta = $ctaModel->where('hero_id', $heroId)->first();
+        }
+        return $cta;
+    }
+
+    private function _extractBlockContent(string $type): array
+    {
+        $p = fn($k) => $this->request->getPost($k) ?? '';
+        return match($type) {
+            'headline'    => ['title' => $p('title'), 'subtitle' => $p('subtitle'), 'image_path' => $p('image_path_existing')],
+            'text'        => ['content' => $p('content'), 'align' => $p('align') ?: 'left'],
+            'image'       => ['image_path' => $p('image_path_existing'), 'caption' => $p('caption'), 'size' => $p('size') ?: 'contained'],
+            'video_embed' => ['url' => $p('url'), 'title' => $p('title')],
+            'testimony'   => ['quote' => $p('quote'), 'author' => $p('author'), 'sport' => $p('sport'), 'image_path' => $p('image_path_existing')],
+            'process'     => ['steps' => array_map(fn($n,$t,$d) => ['number'=>$n,'title'=>$t,'desc'=>$d],
+                                $this->request->getPost('step_number') ?? [],
+                                $this->request->getPost('step_title')  ?? [],
+                                $this->request->getPost('step_desc')   ?? [])],
+            'cta_button'  => ['text' => $p('text'), 'scroll_to_agenda' => (bool)$p('scroll_to_agenda')],
+            'spacer'      => ['height' => $p('height') ?: 'md'],
+            default       => [],
+        };
+    }
+
+    private function _handleBlockImageUpload(array $content, array $existing = []): array
+    {
+        $file = $this->request->getFile('block_image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $name = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/landing/', $name);
+            // Remove imagem anterior se existir
+            if (!empty($existing['image_path']) && file_exists(FCPATH . $existing['image_path'])) {
+                @unlink(FCPATH . $existing['image_path']);
+            }
+            $content['image_path'] = 'uploads/landing/' . $name;
+        }
+        return $content;
     }
 }

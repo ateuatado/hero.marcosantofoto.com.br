@@ -12,7 +12,7 @@ class Cta extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['hero_id', 'type', 'title', 'description', 'button_text', 'button_url'];
+    protected $allowedFields    = ['hero_id', 'title', 'description', 'button_text', 'button_url'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

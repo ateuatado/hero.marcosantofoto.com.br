@@ -8,11 +8,12 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Google Fonts: EB Garamond + Inter -->
+    <!-- Google Fonts: EB Garamond + Inter (idêntico ao marcosantofoto.com.br) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+    <!-- Overrides de cor/fonte apenas — não altera layout Bootstrap -->
     <style>
         :root {
             --mst-gold:      #C5A059;
@@ -24,23 +25,26 @@
             background-color: var(--mst-bg);
             font-family: 'Inter', system-ui, sans-serif;
             font-weight: 300;
-            color: #ffffff;
         }
 
+        /* Títulos: EB Garamond (igual marcosantofoto.com.br) */
         h1, h2, h3, h4, h5, h6, .brand-font {
             font-family: 'EB Garamond', Georgia, serif;
             font-weight: 500;
             letter-spacing: 0.03em;
         }
 
+        /* Dourado no lugar do branco para headings de destaque */
         .text-gold { color: var(--mst-gold) !important; }
 
+        /* Navbar */
         .navbar { background-color: transparent !important; transition: background-color 0.3s ease; }
         .navbar.scrolled { background-color: rgba(0, 0, 0, 0.92) !important; backdrop-filter: blur(10px); }
         .navbar-brand { font-family: 'EB Garamond', serif; font-size: 1.1rem; color: var(--mst-gold) !important; }
         .navbar-brand .nav-sub { font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.5; margin-left: 8px; }
         .nav-link { font-family: 'Inter', sans-serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; }
 
+        /* Botão dourado (override do Bootstrap btn-light) */
         .btn-terroso {
             background-color: var(--mst-gold);
             border-color:     var(--mst-gold);
@@ -70,8 +74,11 @@
         }
 
         .hero-link { text-decoration: none; color: inherit; }
+
+        /* Zoom suave no hover da foto de capa */
         a:hover .hero-card-img { transform: scale(1.05); }
     </style>
+
     <?= $this->renderSection('styles') ?>
 </head>
 <body>

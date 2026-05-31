@@ -5,8 +5,19 @@
     <a href="<?= site_url('admin/heroes') ?>" class="btn btn-outline-secondary">&larr; Voltar para Heróis</a>
 </div>
 
-        <?php if(isset($hero)): ?>
-            <?= view('admin/heroes/_nav', ['hero' => $hero, 'active' => 'details', 'title' => 'Dados do Herói']) ?>
+<div class="card bg-dark text-white border-secondary">
+    <div class="card-header border-secondary text-info fw-bold text-uppercase">
+        <?= isset($hero) ? 'Editar Herói' : 'Novo Herói' ?>
+    </div>
+    <div class="card-body">
+        <?php if(session('errors')): ?>
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    <?php foreach(session('errors') as $error): ?>
+                        <li><?= esc($error) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         <?php endif; ?>
 
         <form action="<?= isset($hero) ? site_url('admin/heroes/' . $hero['id']) : site_url('admin/heroes') ?>" method="post">
