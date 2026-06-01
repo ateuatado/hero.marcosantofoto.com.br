@@ -48,6 +48,7 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
 
     // Pacotes
     $routes->resource('packages', ['controller' => 'Admin\PackageController', 'websafe' => 1]);
+    $routes->resource('categories', ['controller' => 'Admin\CategoryController', 'websafe' => 1]);
 
     // Projetos de clientes + sync S3
     $routes->resource('client-projects', ['controller' => 'Admin\ClientProjectController', 'websafe' => 1]);

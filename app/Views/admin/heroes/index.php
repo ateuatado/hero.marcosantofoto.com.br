@@ -30,8 +30,11 @@
                     <?php if (!empty($heroes)): ?>
                         <?php foreach ($heroes as $hero): ?>
                         <tr>
-                            <td class="fw-bold"><?= esc($hero['name']) ?></td>
-                            <td><?= esc($hero['sport']) ?></td>
+                            <td class="fw-bold">
+                                <?= esc($hero['name']) ?>
+                                <span class="badge bg-secondary d-block mt-1" style="font-size: 0.65rem; font-weight: normal; width: max-content; opacity: 0.85;"><?= esc($hero['category_name'] ?? 'Geral') ?></span>
+                            </td>
+                            <td><?= esc($hero['sport'] ?: 'Nenhum') ?></td>
                             <td>
                                 <?php if ($hero['published']): ?>
                                     <a href="<?= site_url($hero['slug']) ?>" class="text-info" target="_blank">/<?= esc($hero['slug']) ?></a>

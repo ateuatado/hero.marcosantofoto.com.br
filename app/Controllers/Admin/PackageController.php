@@ -16,16 +16,36 @@ class PackageController extends BaseController
 
     public function index()
     {
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->findAll();
+        
+        $categoryMap = [];
+        foreach ($categories as $cat) {
+            $categoryMap[$cat->id] = $cat->name;
+        }
+
+        $packages = $this->packageModel->findAll();
+        foreach ($packages as &$pkg) {
+            $pkg->category_name = $categoryMap[$pkg->category_id ?? 0] ?? 'Sem Categoria';
+        }
+        unset($pkg);
+
         $data = [
             'title'    => 'Pacotes',
-            'packages' => $this->packageModel->findAll()
+            'packages' => $packages
         ];
         return view('admin/packages/index', $data);
     }
 
     public function new()
     {
-        return view('admin/packages/form', ['title' => 'Novo Pacote']);
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->where('is_active', 1)->orderBy('name', 'asc')->findAll();
+
+        return view('admin/packages/form', [
+            'title'      => 'Novo Pacote',
+            'categories' => $categories
+        ]);
     }
 
     public function create()
@@ -33,6 +53,11 @@ class PackageController extends BaseController
         $data = $this->request->getPost();
         $data['is_active']    = isset($data['is_active']) ? 1 : 0;
         $data['is_preferred'] = isset($data['is_preferred']) ? 1 : 0;
+        
+        // Trata category_id se vazio
+        if (empty($data['category_id'])) {
+            $data['category_id'] = null;
+        }
         
         if ($this->packageModel->save($data)) {
             return redirect()->to('/admin/packages')->with('message', 'Pacote criado com sucesso.');
@@ -46,9 +71,13 @@ class PackageController extends BaseController
         $package = $this->packageModel->find($id);
         if (!$package) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
 
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->where('is_active', 1)->orderBy('name', 'asc')->findAll();
+
         return view('admin/packages/form', [
-            'title'   => 'Editar Pacote',
-            'package' => $package
+            'title'      => 'Editar Pacote',
+            'package'    => $package,
+            'categories' => $categories
         ]);
     }
 
@@ -58,6 +87,11 @@ class PackageController extends BaseController
         $data['id'] = $id;
         $data['is_active']    = isset($data['is_active']) ? 1 : 0;
         $data['is_preferred'] = isset($data['is_preferred']) ? 1 : 0;
+
+        // Trata category_id se vazio
+        if (empty($data['category_id'])) {
+            $data['category_id'] = null;
+        }
 
         if ($this->packageModel->save($data)) {
             return redirect()->to('/admin/packages')->with('message', 'Pacote atualizado com sucesso.');

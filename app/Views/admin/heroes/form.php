@@ -33,10 +33,22 @@
             </div>
 
             <div class="mb-3">
-                <label for="sport" class="form-label">Esporte / Modalidade *</label>
+                <label class="form-label">Categoria / Nicho de Fotografia</label>
+                <select name="category_id" class="form-select bg-black text-white border-secondary">
+                    <option value="">Nenhum (Nicho Geral)</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <?php $selected = (isset($hero) && ($hero['category_id'] ?? 0) == $cat->id) ? 'selected' : ''; ?>
+                        <option value="<?= esc($cat->id) ?>" <?= $selected ?>><?= esc($cat->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="form-text text-muted">Classifique sob o nicho correspondente.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="sport" class="form-label">Esporte / Sub-nicho (Opcional)</label>
                 <input type="text" class="form-control bg-black text-white border-secondary" id="sport" name="sport" 
-                       value="<?= old('sport', $hero['sport'] ?? '') ?>" required>
-                <div class="form-text text-muted">Ex: Body Building, Ciclismo, etc.</div>
+                       value="<?= old('sport', $hero['sport'] ?? '') ?>">
+                <div class="form-text text-muted">Ex: Ciclismo, Estúdio Gestante, PET Exótico, etc.</div>
             </div>
 
             <div class="mb-4">

@@ -17,40 +17,70 @@ class HeroController extends BaseController
 
     public function index()
     {
-        $data['heroes'] = $this->heroModel->orderBy('created_at', 'desc')->findAll();
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->findAll();
+        
+        $categoryMap = [];
+        foreach ($categories as $cat) {
+            $categoryMap[$cat->id] = $cat->name;
+        }
+
+        $heroes = $this->heroModel->orderBy('created_at', 'desc')->findAll();
+        foreach ($heroes as &$h) {
+            $h['category_name'] = $categoryMap[$h['category_id'] ?? 0] ?? 'Sem Categoria';
+        }
+        unset($h);
+
+        $data['heroes'] = $heroes;
         return view('admin/heroes/index', $data);
     }
 
     public function new()
     {
-        return view('admin/heroes/form');
+        $categoryModel = new \App\Models\CategoryModel();
+        $data = [
+            'title'      => 'Novo Portfólio / Atleta',
+            'categories' => $categoryModel->where('is_active', 1)->orderBy('name', 'asc')->findAll()
+        ];
+        return view('admin/heroes/form', $data);
     }
 
     public function create()
     {
         $rules = [
-            'name' => 'required|min_length[3]',
-            'sport' => 'required',
-            'slug' => 'required|is_unique[heroes.slug]'
+            'name'  => 'required|min_length[3]',
+            'sport' => 'permit_empty',
+            'slug'  => 'required|is_unique[heroes.slug]'
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $catId = $this->request->getPost('category_id');
+
         $this->heroModel->save([
-            'name' => $this->request->getPost('name'),
-            'sport' => $this->request->getPost('sport'),
-            'slug' => url_title($this->request->getPost('slug'), '-', true)
+            'name'        => $this->request->getPost('name'),
+            'sport'       => $this->request->getPost('sport'),
+            'category_id' => !empty($catId) ? (int)$catId : null,
+            'slug'        => url_title($this->request->getPost('slug'), '-', true)
         ]);
 
-        return redirect()->to(site_url('admin/heroes'))->with('message', 'Herói criado com sucesso.');
+        return redirect()->to(site_url('admin/heroes'))->with('message', 'Portfólio criado com sucesso.');
     }
 
     public function edit($id = null)
     {
-        $data['hero'] = $this->heroModel->find($id);
-        if (!$data['hero']) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        $hero = $this->heroModel->find($id);
+        if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        
+        $categoryModel = new \App\Models\CategoryModel();
+        
+        $data = [
+            'title'      => 'Editar Portfólio',
+            'hero'       => $hero,
+            'categories' => $categoryModel->where('is_active', 1)->orderBy('name', 'asc')->findAll()
+        ];
         
         return view('admin/heroes/form', $data);
     }
@@ -58,28 +88,31 @@ class HeroController extends BaseController
     public function update($id = null)
     {
         $rules = [
-            'name' => 'required|min_length[3]',
-            'sport' => 'required',
-            'slug' => "required|is_unique[heroes.slug,id,{$id}]"
+            'name'  => 'required|min_length[3]',
+            'sport' => 'permit_empty',
+            'slug'  => "required|is_unique[heroes.slug,id,{$id}]"
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $catId = $this->request->getPost('category_id');
+
         $this->heroModel->update($id, [
-            'name' => $this->request->getPost('name'),
-            'sport' => $this->request->getPost('sport'),
-            'slug' => url_title($this->request->getPost('slug'), '-', true)
+            'name'        => $this->request->getPost('name'),
+            'sport'       => $this->request->getPost('sport'),
+            'category_id' => !empty($catId) ? (int)$catId : null,
+            'slug'        => url_title($this->request->getPost('slug'), '-', true)
         ]);
 
-        return redirect()->to(site_url('admin/heroes'))->with('message', 'Herói atualizado com sucesso.');
+        return redirect()->to(site_url('admin/heroes'))->with('message', 'Portfólio atualizado com sucesso.');
     }
 
     public function delete($id = null)
     {
         $this->heroModel->delete($id);
-        return redirect()->to(site_url('admin/heroes'))->with('message', 'Herói deletado.');
+        return redirect()->to(site_url('admin/heroes'))->with('message', 'Portfólio excluído.');
     }
 
     public function photos($heroId)

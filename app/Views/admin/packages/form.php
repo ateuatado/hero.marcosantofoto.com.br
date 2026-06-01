@@ -26,7 +26,19 @@
             
             <div class="mb-3">
                 <label class="form-label">Nome do Pacote</label>
-                <input type="text" name="name" class="form-control bg-dark text-white" value="<?= old('name', $package->name ?? '') ?>" required>
+                <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="<?= old('name', $package->name ?? '') ?>" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Categoria / Nicho de Fotografia</label>
+                <select name="category_id" class="form-select bg-dark text-white border-secondary">
+                    <option value="">Nenhum (Nicho Geral)</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <?php $selected = (isset($package) && $package->category_id == $cat->id) ? 'selected' : ''; ?>
+                        <option value="<?= esc($cat->id) ?>" <?= $selected ?>><?= esc($cat->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Classifique sob o nicho correspondente para ancoragem de preço ideal.</small>
             </div>
             
             <div class="mb-3">

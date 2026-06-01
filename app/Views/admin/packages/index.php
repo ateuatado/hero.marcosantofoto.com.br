@@ -30,9 +30,10 @@
                         <tr>
                             <td><?= esc($pkg->id) ?></td>
                             <td>
-                                <strong><?= esc($pkg->name) ?></strong>
+                                <strong class="d-block mb-1"><?= esc($pkg->name) ?></strong>
+                                <span class="badge bg-secondary" style="font-size: 0.65rem; opacity: 0.85;"><?= esc($pkg->category_name ?? 'Geral') ?></span>
                                 <?php if (isset($pkg->is_preferred) && $pkg->is_preferred == 1): ?>
-                                    <span class="badge text-dark ms-1" style="background: var(--mst-gold, #c5a059);"><i class="fas fa-star"></i> Destaque</span>
+                                    <span class="badge text-dark ms-1" style="background: var(--mst-gold, #c5a059); font-size: 0.65rem;"><i class="fas fa-star"></i> Destaque</span>
                                 <?php endif; ?>
                             </td>
                             <td>R$ <?= number_format($pkg->base_price, 2, ',', '.') ?></td>

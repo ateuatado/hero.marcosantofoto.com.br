@@ -12,7 +12,7 @@ class Hero extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'sport', 'slug', 'cover_photo_id', 'published'];
+    protected $allowedFields    = ['name', 'sport', 'category_id', 'slug', 'cover_photo_id', 'published'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,7 +28,13 @@ class Hero extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
+    protected $validationRules      = [
+        'name'        => 'required|max_length[255]',
+        'sport'       => 'permit_empty|max_length[255]',
+        'category_id' => 'permit_empty|is_natural_no_zero',
+        'slug'        => 'required|alpha_dash|max_length[255]|is_unique[heroes.slug,id,{id}]',
+        'published'   => 'permit_empty|in_list[0,1]',
+    ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

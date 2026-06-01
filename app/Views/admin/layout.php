@@ -28,6 +28,9 @@
                         <a class="nav-link" href="<?= site_url('admin/bookings') ?>">Agendas</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-info" href="<?= site_url('admin/categories') ?>">Nichos/Categorias</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-info" href="<?= site_url('admin/packages') ?>">Pacotes</a>
                     </li>
                     <li class="nav-item">
