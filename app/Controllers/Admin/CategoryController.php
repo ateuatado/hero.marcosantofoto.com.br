@@ -12,6 +12,7 @@ class CategoryController extends BaseController
     public function __construct()
     {
         $this->categoryModel = new CategoryModel();
+        helper('text');
     }
 
     public function index()
