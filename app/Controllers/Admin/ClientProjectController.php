@@ -226,10 +226,10 @@ class ClientProjectController extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        $bucket    = getenv('AWS_S3_BUCKET');
-        $accessKey = getenv('AWS_ACCESS_KEY_ID');
-        $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
-        $region    = getenv('AWS_REGION') ?: 'us-east-2';
+        $bucket    = trim(getenv('AWS_S3_BUCKET'), '"\' ');
+        $accessKey = trim(getenv('AWS_ACCESS_KEY_ID'), '"\' ');
+        $secretKey = trim(getenv('AWS_SECRET_ACCESS_KEY'), '"\' ');
+        $region    = trim(getenv('AWS_REGION') ?: 'us-east-2', '"\' ');
 
         // Limpa caracteres especiais do nome para gerar o nome do arquivo
         $cleanName = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $project->name);
