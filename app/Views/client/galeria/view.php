@@ -2,235 +2,489 @@
 
 <?= $this->section('styles') ?>
 <style>
+    :root {
+        --mst-gold: #c5a059;
+        --mst-gold-dark: #a37f3d;
+        --mst-bg-dark: #0a0a0a;
+        --mst-card-bg: #141414;
+        --mst-border: rgba(197, 160, 89, 0.2);
+    }
+
+    body {
+        background-color: var(--mst-bg-dark) !important;
+        color: #f5f5f5 !important;
+    }
+
     .photo-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
     }
+
     .photo-item {
         position: relative;
-        cursor: pointer;
+        background: var(--mst-card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
         overflow: hidden;
-        border-radius: 6px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background: #111;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
     }
-    .photo-item img {
-        width: 100%;
-        height: 260px;
-        object-fit: cover;
-        display: block;
-        transition: opacity 0.3s ease, transform 0.3s ease;
+
+    .photo-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--mst-gold);
     }
-    .photo-item:hover img {
-        transform: scale(1.03);
-    }
-    .photo-item.selected img {
-        opacity: 0.55;
-    }
+
     .photo-item.selected {
-        box-shadow: 0 0 0 4px var(--mst-gold, #c5a059);
-        transform: scale(0.975);
+        box-shadow: 0 0 0 3px var(--mst-gold), 0 10px 20px rgba(0, 0, 0, 0.6);
+        border-color: var(--mst-gold);
     }
-    /* Badge de check */
-    .check-icon {
+
+    .photo-wrapper {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        overflow: hidden;
+        background: #0d0d0d;
+    }
+
+    .photo-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .photo-item:hover .photo-wrapper img {
+        transform: scale(1.05);
+    }
+
+    /* Overlay no hover */
+    .photo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.85) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 12px;
+        pointer-events: none;
+    }
+
+    .photo-item:hover .photo-overlay,
+    .photo-item.selected .photo-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Botão de seleção premium */
+    .select-badge {
         position: absolute;
         top: 12px;
         right: 12px;
-        width: 32px;
-        height: 32px;
-        background: var(--mst-gold, #c5a059);
-        color: #000;
+        width: 36px;
+        height: 36px;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        color: #fff;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
         font-size: 1rem;
-        opacity: 0;
-        transform: scale(0);
-        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        pointer-events: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 10;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-    .photo-item.selected .check-icon {
-        opacity: 1;
-        transform: scale(1);
+
+    .photo-item.selected .select-badge {
+        background: var(--mst-gold);
+        border-color: var(--mst-gold);
+        color: #000;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px var(--mst-gold);
     }
-    /* Número da foto */
-    .photo-number {
+
+    /* Botão de Amei/Coração */
+    .love-btn {
         position: absolute;
-        bottom: 10px;
-        left: 10px;
-        background: rgba(0,0,0,0.6);
-        color: #fff;
-        font-size: 0.7rem;
+        top: 12px;
+        left: 12px;
+        width: 36px;
+        height: 36px;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 10;
+    }
+
+    .love-btn:hover {
+        transform: scale(1.1);
+        color: #ff4757;
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .love-btn.loved {
+        background: rgba(255, 71, 87, 0.15);
+        border-color: #ff4757;
+        color: #ff4757;
+        transform: scale(1.1);
+        animation: heartBeat 0.4s ease-out;
+    }
+
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        35% { transform: scale(1.3); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1.1); }
+    }
+
+    /* Classificação de estrelas */
+    .rating-bar {
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 30px;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        margin: 0 auto;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+    }
+
+    .star-icon {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star-icon:hover,
+    .star-icon.active {
+        color: var(--mst-gold);
+        transform: scale(1.2);
+        text-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
+    }
+
+    /* Info do rodapé do card */
+    .photo-footer {
+        padding: 10px 14px;
+        background: rgba(0,0,0,0.3);
+        border-top: 1px solid rgba(255,255,255,0.03);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+    }
+
+    .photo-name {
+        color: #888;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .photo-index {
+        background: rgba(197, 160, 89, 0.15);
+        color: var(--mst-gold);
         padding: 2px 8px;
-        border-radius: 20px;
-        pointer-events: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.7rem;
     }
-    /* Loading skeleton */
-    .photo-skeleton {
-        width: 100%;
-        height: 260px;
-        background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 6px;
-    }
-    @keyframes shimmer {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    /* Barra flutuante */
+
+    /* Barra flutuante refinada */
     .floating-bar {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(8, 8, 8, 0.96);
-        backdrop-filter: blur(16px);
-        border-top: 1px solid rgba(197, 160, 89, 0.35);
-        padding: 1rem 0;
+        background: rgba(10, 10, 10, 0.92);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--mst-gold);
+        padding: 1.25rem 0;
         z-index: 1000;
         transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
     }
+
     .floating-bar.visible {
         transform: translateY(0);
     }
-    /* Alerta de erro S3 */
-    .s3-warning {
-        background: rgba(255, 193, 7, 0.1);
-        border: 1px solid rgba(255, 193, 7, 0.3);
-        border-radius: 8px;
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 1.5rem;
-        color: #ffc107;
-        font-size: 0.9rem;
+
+    .btn-terroso {
+        background: var(--mst-gold);
+        color: #000;
+        font-weight: 600;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
     }
-    /* Estado vazio */
+
+    .btn-terroso:hover {
+        background: var(--mst-gold-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
+        color: #000;
+    }
+
+    /* Badge viva Sincronizando */
+    .sync-status {
+        position: fixed;
+        top: 90px;
+        right: 24px;
+        background: rgba(20, 20, 20, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--mst-border);
+        border-radius: 30px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1001;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+
+    .sync-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2ed573;
+        animation: pulse 1.5s infinite;
+    }
+
+    .sync-dot.syncing {
+        background: var(--mst-gold);
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.9); opacity: 0.6; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    /* Skeleton e Empty State */
+    .photo-skeleton {
+        width: 100%;
+        height: 280px;
+        background: linear-gradient(90deg, #141414 25%, #222 50%, #141414 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 12px 12px 0 0;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
     .empty-state {
         text-align: center;
-        padding: 5rem 2rem;
-        color: #555;
+        padding: 6rem 2rem;
+        color: #666;
+        border: 2px dashed rgba(255,255,255,0.05);
+        border-radius: 20px;
+        background: rgba(255,255,255,0.01);
     }
+
     .empty-state .icon {
-        font-size: 4rem;
+        font-size: 4.5rem;
         margin-bottom: 1.5rem;
-        opacity: 0.4;
+        color: var(--mst-gold);
+        opacity: 0.6;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Efeito de fade-in para novas fotos */
+    .fade-in-item {
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid px-4" style="margin-top: 100px; padding-bottom: 140px;">
 
-    <!-- Cabeçalho -->
+<!-- Status de Sincronização em Tempo Real -->
+<div class="sync-status" id="syncStatus">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncText">Studio Conectado</span>
+</div>
+
+<div class="container-fluid px-4" style="margin-top: 110px; padding-bottom: 150px;">
+
+    <!-- Cabeçalho Principal -->
     <div class="text-center mb-5">
-        <h1 class="text-gold brand-font text-uppercase mb-2" style="font-size: 2rem; letter-spacing: 0.12em;">
-            Seleção de Fotos
+        <h1 class="text-gold brand-font text-uppercase mb-2" style="font-size: 2.2rem; letter-spacing: 0.15em; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">
+            <?= esc($project->name ?? 'Minha Galeria') ?>
         </h1>
-        <p class="text-muted mb-1">
-            Projeto #<?= esc($project->id) ?> &mdash; Pacote: <strong class="text-white"><?= esc($package->name) ?></strong>
+        <p class="text-muted mb-2">
+            Cliente: <strong class="text-white"><?= esc(auth()->user()->username ?? auth()->user()->email) ?></strong> &mdash; 
+            Pacote: <strong class="text-white"><?= esc($package->name) ?></strong>
         </p>
-        <p class="small text-white-50">
-            Seu pacote inclui <strong><?= esc($package->included_photos) ?> foto<?= $package->included_photos != 1 ? 's' : '' ?></strong>.
-            Fotos extras custam <strong>R$ <?= number_format($package->extra_photo_price, 2, ',', '.') ?></strong> cada.
-        </p>
-        <?php if ($project->status === 'completed'): ?>
-            <span class="badge bg-success mt-1">Seleção finalizada</span>
-        <?php elseif ($project->status === 'selecting'): ?>
-            <span class="badge bg-warning text-dark mt-1">Em seleção</span>
+        <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+            <span class="badge" style="background: rgba(197, 160, 89, 0.15); color: var(--mst-gold); border: 1px solid var(--mst-border); padding: 6px 12px;">
+                Inclui: <strong><?= esc($package->included_photos) ?> fotos</strong>
+            </span>
+            <span class="badge" style="background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px;">
+                Foto Extra: <strong>R$ <?= number_format($package->extra_photo_price, 2, ',', '.') ?></strong>
+            </span>
+            <span class="badge bg-<?= $project->status === 'completed' ? 'success' : ($project->status === 'selecting' ? 'warning text-dark' : 'secondary') ?>" id="projectStatusBadge" style="padding: 6px 12px;">
+                <?= $project->status === 'completed' ? 'Seleção Finalizada' : ($project->status === 'selecting' ? 'Em Seleção' : 'Aguardando Fotos') ?>
+            </span>
+        </div>
+    </div>
+
+    <!-- Grade de Fotos Dinâmica -->
+    <div class="photo-grid" id="photoGrid">
+        <?php if (!empty($photos)): ?>
+            <?php foreach ($photos as $i => $photo): ?>
+                <div class="photo-item <?= $photo->status === 'selected' ? 'selected' : '' ?>" id="photo-card-<?= $photo->id ?>" data-id="<?= $photo->id ?>">
+                    
+                    <!-- Botões de Ação Instantânea -->
+                    <button class="love-btn <?= $photo->is_loved == 1 ? 'loved' : '' ?>" 
+                            onclick="toggleLove(<?= $project->id ?>, <?= $photo->id ?>, this, event)" 
+                            title="Amei esta foto">
+                        <i class="fas fa-heart"></i>
+                    </button>
+
+                    <div class="select-badge" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this, event)" title="Selecionar para o pacote">
+                        <i class="fas <?= $photo->status === 'selected' ? 'fa-check' : 'fa-plus' ?>"></i>
+                    </div>
+
+                    <!-- Imagem Proxy -->
+                    <div class="photo-wrapper" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this.closest('.photo-item').querySelector('.select-badge'), event)">
+                        <?php if (!empty($photo->presigned_url)): ?>
+                            <img src="<?= esc($photo->presigned_url) ?>" alt="Foto <?= $i + 1 ?>" loading="lazy">
+                        <?php else: ?>
+                            <div class="photo-skeleton"></div>
+                        <?php endif; ?>
+
+                        <!-- Overlay com Estrelas -->
+                        <div class="photo-overlay">
+                            <div></div>
+                            <div class="rating-bar" onclick="event.stopPropagation()">
+                                <?php for ($s = 1; $s <= 5; $s++): ?>
+                                    <i class="fas fa-star star-icon <?= $s <= $photo->rating ? 'active' : '' ?>" 
+                                       data-value="<?= $s ?>" 
+                                       onclick="setRating(<?= $project->id ?>, <?= $photo->id ?>, <?= $s ?>, this)"></i>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé do Card -->
+                    <div class="photo-footer">
+                        <span class="photo-name" title="<?= esc($photo->original_filename) ?>"><?= esc($photo->original_filename) ?></span>
+                        <span class="photo-index">#<?= $i + 1 ?></span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
         <?php else: ?>
-            <span class="badge bg-secondary mt-1">Aguardando fotos</span>
+            <!-- Mostrar em estado vazio se não houver fotos ainda -->
+            <div class="w-100 grid-full-width" id="emptyStatePlaceholder">
+                <div class="empty-state">
+                    <div class="icon"><i class="fas fa-camera-retro"></i></div>
+                    <h4 class="text-white-50 mb-2">Preparando sua sessão no Studio...</h4>
+                    <p class="text-muted small">
+                        O fotógrafo está preparando as fotos do seu ensaio.<br>
+                        Assim que as fotos forem tiradas, elas surgirão aqui **automaticamente** em tempo real!
+                    </p>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 
-    <!-- Aviso de erro de sincronização S3 -->
-    <?php if (!empty($syncError)): ?>
-        <div class="s3-warning">
-            ⚠️ Não foi possível sincronizar com o servidor de fotos agora. Exibindo fotos registradas anteriormente.
-        </div>
-    <?php endif; ?>
-
-    <!-- Grade de fotos -->
-    <?php if (!empty($photos)): ?>
-        <div class="photo-grid" id="photoGrid">
-            <?php foreach ($photos as $i => $photo): ?>
-                <div
-                    class="photo-item <?= $photo->status === 'selected' ? 'selected' : '' ?>"
-                    data-id="<?= $photo->id ?>"
-                    title="<?= esc($photo->original_filename) ?>"
-                >
-                    <?php if (!empty($photo->presigned_url)): ?>
-                        <img
-                            src="<?= esc($photo->presigned_url) ?>"
-                            alt="Foto <?= $i + 1 ?>"
-                            loading="lazy"
-                            onerror="this.closest('.photo-item').classList.add('load-error'); this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'260\' height=\'260\'><rect fill=\'%23111\'/><text x=\'50%25\' y=\'50%25\' fill=\'%23444\' text-anchor=\'middle\' dy=\'.3em\' font-size=\'12\'>Erro ao carregar</text></svg>'"
-                        >
-                    <?php else: ?>
-                        <div class="photo-skeleton"></div>
-                    <?php endif; ?>
-                    <div class="check-icon">✓</div>
-                    <div class="photo-number"><?= $i + 1 ?></div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php else: ?>
-        <div class="empty-state">
-            <div class="icon">📷</div>
-            <h4 class="text-white-50 mb-2">Nenhuma foto disponível ainda</h4>
-            <p class="text-muted small">
-                As fotos do ensaio aparecerão aqui assim que forem processadas.<br>
-                Isso acontece automaticamente após o fotógrafo enviar as imagens.
-            </p>
-        </div>
-    <?php endif; ?>
-
 </div>
 
-<!-- Barra Flutuante de Ação -->
-<?php if (!empty($photos) && in_array($project->status, ['open', 'selecting'])): ?>
-<div class="floating-bar" id="floatingBar">
+<!-- Barra Flutuante Dinâmica de Fechamento -->
+<div class="floating-bar <?= !empty($photos) ? 'visible' : '' ?>" id="floatingBar">
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h5 class="mb-0 text-white brand-font">
-                Selecionadas: <span id="selectedCount" class="text-gold">0</span>
-                <span class="text-muted fw-normal" style="font-size:0.85rem;">/ <?= esc($package->included_photos) ?> incluídas</span>
+                Selecionadas: <span id="selectedCount" class="text-gold" style="font-weight: 700; font-size: 1.4rem;">0</span>
+                <span class="text-muted fw-normal" style="font-size:0.85rem;">/ <?= esc($package->included_photos) ?> inclusas</span>
             </h5>
-            <small class="text-muted" id="extraInfo">Sem custos extras.</small>
+            <small class="text-muted" id="extraInfo">Carregando informações...</small>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-light" id="btnSaveProgress">
-                <span id="btnSaveText">Salvar Progresso</span>
-            </button>
-            <a href="<?= site_url('client/galeria/' . $project->id . '/checkout') ?>"
-               class="btn btn-terroso" id="btnCheckout">
-                Finalizar Seleção →
-            </a>
+        <div class="d-flex gap-3">
+            <span id="saveIndicator" class="text-success align-self-center me-2 d-none" style="font-size: 0.9rem;">
+                <i class="fas fa-check-circle me-1"></i> Sincronizado
+            </span>
+            <?php if ($project->status !== 'completed'): ?>
+                <a href="<?= site_url('client/galeria/' . $project->id . '/checkout') ?>"
+                   class="btn btn-terroso d-flex align-items-center gap-2" id="btnCheckout">
+                    <span>Finalizar Seleção</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            <?php else: ?>
+                <button class="btn btn-secondary" disabled>Sessão Concluída</button>
+            <?php endif; ?>
         </div>
     </div>
 </div>
-<?php endif; ?>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-(function () {
+    const projectId      = <?= (int)$project->id ?>;
     const includedPhotos = <?= (int)$package->included_photos ?>;
     const extraPrice     = <?= (float)$package->extra_photo_price ?>;
-    const saveUrl        = "<?= site_url('client/galeria/' . $project->id . '/save') ?>";
+    const isCompleted    = <?= $project->status === 'completed' ? 'true' : 'false' ?>;
+    
+    // Conjunto de IDs selecionados no client-side
+    let selectedIds = new Set();
+    
+    // Armazena as keys/filenames existentes locais para evitar piscar imagens ao atualizar no poll
+    let existingPhotoIds = new Set();
 
-    // Inicia com as já marcadas no banco
-    let selectedIds = new Set(
-        [...document.querySelectorAll('.photo-item.selected')].map(el => el.dataset.id)
-    );
+    // Inicializa os IDs que vieram marcados do PHP
+    document.querySelectorAll('.photo-item.selected').forEach(el => {
+        selectedIds.add(parseInt(el.dataset.id));
+    });
+    document.querySelectorAll('.photo-item').forEach(el => {
+        existingPhotoIds.add(parseInt(el.dataset.id));
+    });
 
     const fmtBRL = val => 'R$ ' + val.toFixed(2).replace('.', ',');
 
-    function updateUI() {
+    // Atualiza a Barra Flutuante com cálculos de extras
+    function updateFloatingBar() {
         const count = selectedIds.size;
         const extra = Math.max(0, count - includedPhotos);
 
@@ -242,71 +496,276 @@
 
         if (infoEl) {
             if (extra > 0) {
-                infoEl.innerHTML = `<span class="text-warning">${extra} foto${extra > 1 ? 's' : ''} extra${extra > 1 ? 's' : ''} — ${fmtBRL(extra * extraPrice)}</span>`;
+                const totalCost = extra * extraPrice;
+                infoEl.innerHTML = `<span class="text-warning fw-600">${extra} foto${extra > 1 ? 's' : ''} extra${extra > 1 ? 's' : ''} &mdash; +${fmtBRL(totalCost)}</span>`;
             } else {
-                infoEl.textContent = count > 0 ? 'Sem custos extras.' : '';
+                infoEl.innerHTML = `<span class="text-success">Sem custos extras incluídos no pacote.</span>`;
             }
         }
 
         if (bar) {
-            bar.classList.toggle('visible', count > 0);
+            bar.classList.toggle('visible', count > 0 || document.querySelectorAll('.photo-item').length > 0);
         }
     }
 
-    // Clique nas fotos
-    const grid = document.getElementById('photoGrid');
-    if (grid) {
-        grid.addEventListener('click', function (e) {
-            const item = e.target.closest('.photo-item');
-            if (!item) return;
+    // Mostra indicador rápido "Sincronizado" ao salvar ações via AJAX
+    function showSavedIndicator() {
+        const ind = document.getElementById('saveIndicator');
+        if (ind) {
+            ind.classList.remove('d-none');
+            setTimeout(() => ind.classList.add('d-none'), 2000);
+        }
+    }
 
-            const id = item.dataset.id;
-            item.classList.toggle('selected');
-            if (item.classList.contains('selected')) {
-                selectedIds.add(id);
-            } else {
-                selectedIds.delete(id);
+    // 1. AÇÃO INSTANTÂNEA: Curtir/Love
+    function toggleLove(projId, photoId, btn, event) {
+        if (event) event.stopPropagation();
+        if (isCompleted) return;
+
+        btn.disabled = true;
+        fetch(`<?= site_url('client/galeria') ?>/${projId}/photo/${photoId}/love`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
-            updateUI();
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                btn.classList.toggle('loved', data.is_loved == 1);
+                showSavedIndicator();
+                updateProjectStatusBadge('selecting');
+            }
+        })
+        .catch(err => console.error('Erro ao curtir foto:', err))
+        .finally(() => {
+            btn.disabled = false;
         });
     }
 
-    // Botão Salvar Progresso
-    const btnSave = document.getElementById('btnSaveProgress');
-    if (btnSave) {
-        btnSave.addEventListener('click', function () {
-            const textEl = document.getElementById('btnSaveText');
-            textEl.textContent = 'Salvando...';
-            btnSave.disabled = true;
+    // 2. AÇÃO INSTANTÂNEA: Selecionar
+    function toggleSelect(projId, photoId, badge, event) {
+        if (event) event.stopPropagation();
+        if (isCompleted) return;
 
-            fetch(saveUrl, {
-                method:  'POST',
+        const card = document.getElementById(`photo-card-${photoId}`);
+        if (!card) return;
+
+        // AJAX POST instantâneo
+        fetch(`<?= site_url('client/galeria') ?>/${projId}/photo/${photoId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const icon = badge.querySelector('i');
+                if (data.status === 'selected') {
+                    card.classList.add('selected');
+                    selectedIds.add(photoId);
+                    if (icon) {
+                        icon.classList.remove('fa-plus');
+                        icon.classList.add('fa-check');
+                    }
+                } else {
+                    card.classList.remove('selected');
+                    selectedIds.delete(photoId);
+                    if (icon) {
+                        icon.classList.remove('fa-check');
+                        icon.classList.add('fa-plus');
+                    }
+                }
+                updateFloatingBar();
+                showSavedIndicator();
+                updateProjectStatusBadge('selecting');
+            }
+        })
+        .catch(err => console.error('Erro ao selecionar foto:', err));
+    }
+
+    // 3. AÇÃO INSTANTÂNEA: Dar Nota/Estrela
+    function setRating(projId, photoId, stars, starElement) {
+        if (isCompleted) return;
+
+        fetch(`<?= site_url('client/galeria') ?>/${projId}/photo/${photoId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ rating: stars })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const parent = starElement.parentNode;
+                const starIcons = parent.querySelectorAll('.star-icon');
+                starIcons.forEach(s => {
+                    const val = parseInt(s.dataset.value);
+                    s.classList.toggle('active', val <= data.rating);
+                });
+                showSavedIndicator();
+                updateProjectStatusBadge('selecting');
+            }
+        })
+        .catch(err => console.error('Erro ao classificar foto:', err));
+    }
+
+    // Atualiza o badge do status do projeto caso mude de "open" para "selecting"
+    function updateProjectStatusBadge(status) {
+        const badge = document.getElementById('projectStatusBadge');
+        if (badge) {
+            if (status === 'selecting') {
+                badge.className = 'badge bg-warning text-dark';
+                badge.textContent = 'Em Seleção';
+            } else if (status === 'completed') {
+                badge.className = 'badge bg-success';
+                badge.textContent = 'Seleção Finalizada';
+            }
+        }
+    }
+
+    // 4. POLLING EM TEMPO REAL: Atualiza a lista de fotos e adiciona novas de forma viva
+    function startRealTimeSync() {
+        if (isCompleted) return;
+
+        const syncDot = document.getElementById('syncDot');
+        const syncText = document.getElementById('syncText');
+
+        setInterval(() => {
+            // Sinaliza atividade de sync piscando em dourado
+            if (syncDot) syncDot.classList.add('syncing');
+            if (syncText) syncText.textContent = 'Sincronizando...';
+
+            fetch(`<?= site_url('client/galeria/' . $project->id . '/poll') ?>`, {
                 headers: {
-                    'Content-Type':     'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({ selected_photos: [...selectedIds] }),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
             .then(r => r.json())
             .then(data => {
-                textEl.textContent = data.success ? '✓ Salvo!' : 'Erro ao salvar';
-                setTimeout(() => {
-                    textEl.textContent = 'Salvar Progresso';
-                    btnSave.disabled = false;
-                }, 2000);
+                if (data.success) {
+                    if (syncText) syncText.textContent = 'Studio Conectado';
+                    updateProjectStatusBadge(data.status);
+
+                    const grid = document.getElementById('photoGrid');
+                    const emptyPlaceholder = document.getElementById('emptyStatePlaceholder');
+
+                    if (data.photos.length > 0) {
+                        if (emptyPlaceholder) {
+                            emptyPlaceholder.remove();
+                        }
+                    }
+
+                    // Loop nas fotos retornadas pelo S3 Sync
+                    data.photos.forEach((photo, index) => {
+                        const id = parseInt(photo.id);
+
+                        // Se a foto é nova, criamos o elemento dinamicamente e inserimos na grade
+                        if (!existingPhotoIds.has(id)) {
+                            existingPhotoIds.add(id);
+
+                            const card = document.createElement('div');
+                            card.className = 'photo-item fade-in-item';
+                            card.id = `photo-card-${id}`;
+                            card.dataset.id = id;
+
+                            // Monta estrelas
+                            let starsHtml = '';
+                            for (let s = 1; s <= 5; s++) {
+                                starsHtml += `<i class="fas fa-star star-icon ${s <= (photo.rating ?? 0) ? 'active' : ''}" 
+                                                 data-value="${s}" 
+                                                 onclick="setRating(${projectId}, ${id}, ${s}, this)"></i>`;
+                            }
+
+                            card.innerHTML = `
+                                <button class="love-btn ${photo.is_loved == 1 ? 'loved' : ''}" 
+                                        onclick="toggleLove(${projectId}, ${id}, this, event)" 
+                                        title="Amei esta foto">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <div class="select-badge" onclick="toggleSelect(${projectId}, ${id}, this, event)">
+                                    <i class="fas ${photo.status === 'selected' ? 'fa-check' : 'fa-plus'}"></i>
+                                </div>
+                                <div class="photo-wrapper" onclick="toggleSelect(${projectId}, ${id}, this.closest('.photo-item').querySelector('.select-badge'), event)">
+                                    <img src="${photo.presigned_url}" alt="Foto ${index + 1}">
+                                    <div class="photo-overlay">
+                                        <div></div>
+                                        <div class="rating-bar" onclick="event.stopPropagation()">
+                                            ${starsHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="photo-footer">
+                                    <span class="photo-name" title="${photo.original_filename}">${photo.original_filename}</span>
+                                    <span class="photo-index">#${index + 1}</span>
+                                </div>
+                            `;
+
+                            grid.appendChild(card);
+                            
+                            // Se já estiver marcada como selecionada na sincronização remota, atualiza o set local
+                            if (photo.status === 'selected') {
+                                card.classList.add('selected');
+                                selectedIds.add(id);
+                            }
+                        } else {
+                            // Se a foto já existe, apenas atualizamos estados silenciosamente se alterados no banco por outro meio
+                            const existingCard = document.getElementById(`photo-card-${id}`);
+                            if (existingCard) {
+                                // Atualiza o Love
+                                const loveBtn = existingCard.querySelector('.love-btn');
+                                if (loveBtn) {
+                                    loveBtn.classList.toggle('loved', photo.is_loved == 1);
+                                }
+
+                                // Atualiza as Estrelas
+                                const stars = existingCard.querySelectorAll('.star-icon');
+                                stars.forEach(s => {
+                                    const val = parseInt(s.dataset.value);
+                                    s.classList.toggle('active', val <= (photo.rating ?? 0));
+                                });
+
+                                // Sincroniza o status de Seleção local caso tenha mudado remotamente
+                                const badge = existingCard.querySelector('.select-badge');
+                                const icon = badge ? badge.querySelector('i') : null;
+                                if (photo.status === 'selected') {
+                                    existingCard.classList.add('selected');
+                                    selectedIds.add(id);
+                                    if (icon) {
+                                        icon.classList.remove('fa-plus');
+                                        icon.classList.add('fa-check');
+                                    }
+                                } else {
+                                    existingCard.classList.remove('selected');
+                                    selectedIds.delete(id);
+                                    if (icon) {
+                                        icon.classList.remove('fa-check');
+                                        icon.classList.add('fa-plus');
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    updateFloatingBar();
+                }
             })
-            .catch(() => {
-                textEl.textContent = 'Erro de conexão';
+            .catch(err => console.error('Erro de conexão ao sincronizar com o S3:', err))
+            .finally(() => {
                 setTimeout(() => {
-                    textEl.textContent = 'Salvar Progresso';
-                    btnSave.disabled = false;
-                }, 2000);
+                    if (syncDot) syncDot.classList.remove('syncing');
+                }, 1000);
             });
-        });
+        }, 3000);
     }
 
-    // Inicializa UI
-    updateUI();
-})();
+    // Inicializa a UI ao carregar a página
+    updateFloatingBar();
+    startRealTimeSync();
 </script>
 <?= $this->endSection() ?>

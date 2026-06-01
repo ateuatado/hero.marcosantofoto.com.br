@@ -52,6 +52,7 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     // Projetos de clientes + sync S3
     $routes->resource('client-projects', ['controller' => 'Admin\ClientProjectController', 'websafe' => 1]);
     $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
+    $routes->get( 'client-projects/(:num)/poll',     'Admin\ClientProjectController::pollInteractions/$1');
     $routes->post('client-projects/(:num)/sync-s3',  'Admin\ClientProjectController::syncS3/$1');
 
     // Hero CRUD (resource por último para não sobrescrever rotas acima)
@@ -73,7 +74,11 @@ $routes->post('schedule/book',         'ScheduleController::book');
 $routes->group('client', ['filter' => 'session'], static function ($routes) {
     $routes->get( 'galeria',                       'Client\GaleriaController::index');
     $routes->get( 'galeria/(:num)',                'Client\GaleriaController::view/$1');
+    $routes->get( 'galeria/(:num)/poll',           'Client\GaleriaController::pollPhotos/$1');
     $routes->post('galeria/(:num)/save',           'Client\GaleriaController::saveSelection/$1');
+    $routes->post('galeria/(:num)/photo/(:num)/status', 'Client\GaleriaController::togglePhotoStatus/$1/$2');
+    $routes->post('galeria/(:num)/photo/(:num)/love',   'Client\GaleriaController::togglePhotoLove/$1/$2');
+    $routes->post('galeria/(:num)/photo/(:num)/rate',   'Client\GaleriaController::ratePhoto/$1/$2');
     $routes->get( 'galeria/(:num)/checkout',       'Client\GaleriaController::checkout/$1');
 });
 

@@ -112,22 +112,77 @@ class ClientProjectController extends BaseController
         $package    = $this->packageModel->find($project->package_id);
         $photoModel = new ProjectPhotoModel();
 
-        $selectedPhotos = $photoModel->where('project_id', $id)
-                                     ->where('status', 'selected')
-                                     ->findAll();
+        // Lista TODAS as fotos do projeto, não apenas as selecionadas, para acompanhar as interações
+        $photos = $photoModel->where('project_id', $id)
+                             ->orderBy('original_filename', 'asc')
+                             ->findAll();
 
         // Gera presigned URLs para exibição no admin
         $s3 = new AwsS3Service();
-        foreach ($selectedPhotos as &$photo) {
+        foreach ($photos as &$photo) {
             $photo->presigned_url = $s3->getPresignedUrl($photo->proxy_url);
         }
         unset($photo);
 
         return view('admin/client_projects/photos', [
-            'title'          => 'Fotos Selecionadas — Projeto #' . $id,
-            'project'        => $project,
-            'package'        => $package,
-            'selectedPhotos' => $selectedPhotos,
+            'title'   => 'Acompanhamento — ' . esc($project->name),
+            'project' => $project,
+            'package' => $package,
+            'photos'  => $photos,
+        ]);
+    }
+
+    /**
+     * Polling de acompanhamento em tempo real para o fotógrafo (AJAX GET /admin/client-projects/{id}/poll)
+     */
+    public function pollInteractions($id)
+    {
+        $project = $this->projectModel->find($id);
+        if (!$project) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Projeto não encontrado.']);
+        }
+
+        $photoModel = new ProjectPhotoModel();
+        $s3         = new AwsS3Service();
+
+        // Força sincronização rápida com S3 para ver se novas fotos originais foram convertidas pela Lambda
+        try {
+            $photos = $s3->syncProjectPhotos((int)$id, $photoModel);
+        } catch (\Exception $e) {
+            log_message('error', 'Admin S3 Sync Error in Poll: ' . $e->getMessage());
+            $photos = $photoModel->where('project_id', $id)->orderBy('original_filename', 'asc')->findAll();
+            foreach ($photos as &$photo) {
+                $photo->presigned_url = $s3->getPresignedUrl($photo->proxy_url);
+            }
+            unset($photo);
+        }
+
+        $totalPhotos   = count($photos);
+        $selectedCount = 0;
+        $lovedCount    = 0;
+        $ratedCount    = 0;
+
+        foreach ($photos as $photo) {
+            if ($photo->status === 'selected') {
+                $selectedCount++;
+            }
+            if ($photo->is_loved == 1) {
+                $lovedCount++;
+            }
+            if ($photo->rating > 0) {
+                $ratedCount++;
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'photos'  => $photos,
+            'stats'   => [
+                'total'    => $totalPhotos,
+                'selected' => $selectedCount,
+                'loved'    => $lovedCount,
+                'rated'    => $ratedCount,
+            ]
         ]);
     }
 

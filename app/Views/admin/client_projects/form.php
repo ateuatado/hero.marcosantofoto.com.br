@@ -25,6 +25,11 @@
             <?php endif; ?>
             
             <div class="mb-3">
+                <label class="form-label">Nome do Ensaio / Atendimento</label>
+                <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Corporativo 2026" value="<?= esc($project->name ?? old('name')) ?>" required>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Cliente (Usuário)</label>
                 <select name="user_id" class="form-select bg-dark text-white" required>
                     <option value="">Selecione...</option>

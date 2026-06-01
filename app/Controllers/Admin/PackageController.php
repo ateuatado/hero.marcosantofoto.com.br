@@ -31,6 +31,8 @@ class PackageController extends BaseController
     public function create()
     {
         $data = $this->request->getPost();
+        $data['is_active']    = isset($data['is_active']) ? 1 : 0;
+        $data['is_preferred'] = isset($data['is_preferred']) ? 1 : 0;
         
         if ($this->packageModel->save($data)) {
             return redirect()->to('/admin/packages')->with('message', 'Pacote criado com sucesso.');
@@ -54,6 +56,8 @@ class PackageController extends BaseController
     {
         $data = $this->request->getPost();
         $data['id'] = $id;
+        $data['is_active']    = isset($data['is_active']) ? 1 : 0;
+        $data['is_preferred'] = isset($data['is_preferred']) ? 1 : 0;
 
         if ($this->packageModel->save($data)) {
             return redirect()->to('/admin/packages')->with('message', 'Pacote atualizado com sucesso.');

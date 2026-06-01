@@ -12,7 +12,7 @@ class PackageModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'base_price', 'included_photos', 'extra_photo_price'];
+    protected $allowedFields    = ['name', 'base_price', 'description', 'internal_notes', 'included_photos', 'extra_photo_price', 'is_active', 'is_preferred'];
 
     // Dates
     protected $useTimestamps = true;
@@ -23,7 +23,12 @@ class PackageModel extends Model
     // Validation
     protected $validationRules      = [
         'name'              => 'required|max_length[100]',
+        'base_price'        => 'required|decimal',
+        'description'       => 'permit_empty',
+        'internal_notes'    => 'permit_empty',
         'included_photos'   => 'required|is_natural',
         'extra_photo_price' => 'required|decimal',
+        'is_active'         => 'permit_empty|in_list[0,1]',
+        'is_preferred'      => 'permit_empty|in_list[0,1]',
     ];
 }

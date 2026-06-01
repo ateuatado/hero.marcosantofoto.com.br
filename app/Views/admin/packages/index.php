@@ -20,6 +20,7 @@
                     <th>Preço Base</th>
                     <th>Fotos Inclusas</th>
                     <th>Valor Foto Extra</th>
+                    <th>Status</th>
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
@@ -28,10 +29,20 @@
                     <?php foreach ($packages as $pkg): ?>
                         <tr>
                             <td><?= esc($pkg->id) ?></td>
-                            <td><?= esc($pkg->name) ?></td>
+                            <td>
+                                <strong><?= esc($pkg->name) ?></strong>
+                                <?php if (isset($pkg->is_preferred) && $pkg->is_preferred == 1): ?>
+                                    <span class="badge text-dark ms-1" style="background: var(--mst-gold, #c5a059);"><i class="fas fa-star"></i> Destaque</span>
+                                <?php endif; ?>
+                            </td>
                             <td>R$ <?= number_format($pkg->base_price, 2, ',', '.') ?></td>
                             <td><?= esc($pkg->included_photos) ?></td>
-                            <td><?= number_format($pkg->extra_photo_price, 2, ',', '.') ?></td>
+                            <td>R$ <?= number_format($pkg->extra_photo_price, 2, ',', '.') ?></td>
+                            <td>
+                                <span class="badge bg-<?= (isset($pkg->is_active) && $pkg->is_active == 1) ? 'success' : 'danger' ?>">
+                                    <?= (isset($pkg->is_active) && $pkg->is_active == 1) ? 'Publicado' : 'Rascunho' ?>
+                                </span>
+                            </td>
                             <td class="text-end">
                                 <a href="<?= site_url('admin/packages/' . $pkg->id . '/edit') ?>" class="btn btn-sm btn-outline-light">Editar</a>
                                 <form action="<?= site_url('admin/packages/' . $pkg->id) ?>" method="post" class="d-inline" onsubmit="return confirm('Excluir este pacote?');">
@@ -43,7 +54,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="text-center text-muted">Nenhum pacote cadastrado.</td>
+                        <td colspan="7" class="text-center text-muted">Nenhum pacote cadastrado.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

@@ -118,6 +118,144 @@ class GaleriaController extends BaseController
     }
 
     /**
+     * Polling de fotos em tempo real (AJAX GET /client/galeria/{id}/poll)
+     */
+    public function pollPhotos($id)
+    {
+        $userId  = auth()->id();
+        $project = $this->projectModel->where('id', $id)->where('user_id', $userId)->first();
+
+        if (!$project) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Projeto não encontrado.']);
+        }
+
+        $photos = [];
+        if (in_array($project->status, ['open', 'selecting'])) {
+            try {
+                // Sincroniza em tempo real com o S3
+                $photos = $this->s3Service->syncProjectPhotos((int)$id, $this->photoModel);
+            } catch (\Exception $e) {
+                log_message('error', 'Erro ao sincronizar S3 no Poll: ' . $e->getMessage());
+                $photos = $this->photoModel->where('project_id', $id)->orderBy('original_filename', 'asc')->findAll();
+                foreach ($photos as &$photo) {
+                    $photo->presigned_url = $this->s3Service->getPresignedUrl($photo->proxy_url);
+                }
+                unset($photo);
+            }
+        } else {
+            // Se já finalizado, apenas carrega
+            $photos = $this->photoModel->where('project_id', $id)->orderBy('original_filename', 'asc')->findAll();
+            foreach ($photos as &$photo) {
+                $photo->presigned_url = $this->s3Service->getPresignedUrl($photo->proxy_url);
+            }
+            unset($photo);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'photos'  => $photos,
+            'status'  => $project->status,
+        ]);
+    }
+
+    /**
+     * AJAX POST /client/galeria/{projectId}/photo/{photoId}/status
+     */
+    public function togglePhotoStatus($projectId, $photoId)
+    {
+        $userId  = auth()->id();
+        $project = $this->projectModel->where('id', $projectId)->where('user_id', $userId)->first();
+
+        if (!$project || !in_array($project->status, ['open', 'selecting'])) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Projeto inválido ou finalizado.']);
+        }
+
+        $photo = $this->photoModel->where('id', $photoId)->where('project_id', $projectId)->first();
+        if (!$photo) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Foto não encontrada.']);
+        }
+
+        // Transiciona status do projeto para 'selecting'
+        if ($project->status === 'open') {
+            $this->projectModel->update($projectId, ['status' => 'selecting']);
+        }
+
+        $newStatus = $photo->status === 'selected' ? 'pending' : 'selected';
+        $this->photoModel->update($photoId, ['status' => $newStatus]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'status'  => $newStatus,
+        ]);
+    }
+
+    /**
+     * AJAX POST /client/galeria/{projectId}/photo/{photoId}/love
+     */
+    public function togglePhotoLove($projectId, $photoId)
+    {
+        $userId  = auth()->id();
+        $project = $this->projectModel->where('id', $projectId)->where('user_id', $userId)->first();
+
+        if (!$project || !in_array($project->status, ['open', 'selecting'])) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Projeto inválido ou finalizado.']);
+        }
+
+        $photo = $this->photoModel->where('id', $photoId)->where('project_id', $projectId)->first();
+        if (!$photo) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Foto não encontrada.']);
+        }
+
+        // Transiciona status do projeto para 'selecting'
+        if ($project->status === 'open') {
+            $this->projectModel->update($projectId, ['status' => 'selecting']);
+        }
+
+        $newLove = $photo->is_loved == 1 ? 0 : 1;
+        $this->photoModel->update($photoId, ['is_loved' => $newLove]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'is_loved'=> $newLove,
+        ]);
+    }
+
+    /**
+     * AJAX POST /client/galeria/{projectId}/photo/{photoId}/rate
+     */
+    public function ratePhoto($projectId, $photoId)
+    {
+        $userId  = auth()->id();
+        $project = $this->projectModel->where('id', $projectId)->where('user_id', $userId)->first();
+
+        if (!$project || !in_array($project->status, ['open', 'selecting'])) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Projeto inválido ou finalizado.']);
+        }
+
+        $photo = $this->photoModel->where('id', $photoId)->where('project_id', $projectId)->first();
+        if (!$photo) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Foto não encontrada.']);
+        }
+
+        // Transiciona status do projeto para 'selecting'
+        if ($project->status === 'open') {
+            $this->projectModel->update($projectId, ['status' => 'selecting']);
+        }
+
+        $rating = (int) ($this->request->getJSON()->rating ?? 0);
+        if ($rating < 0 || $rating > 5) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Classificação inválida.']);
+        }
+
+        $this->photoModel->update($photoId, ['rating' => $rating]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'rating'  => $rating,
+        ]);
+    }
+
+    /**
      * Checkout: calcula extras e redireciona para MercadoPago.
      */
     public function checkout($id)

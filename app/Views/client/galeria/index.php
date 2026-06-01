@@ -10,7 +10,7 @@
                 <div class="col">
                     <div class="card h-100 bg-black border border-secondary shadow-lg hover-zoom" style="transition: transform 0.3s ease;">
                         <div class="card-body p-4 text-center">
-                            <h3 class="brand-font text-white mb-3">Projeto #<?= esc($proj->id) ?></h3>
+                            <h3 class="brand-font text-white mb-3"><?= esc($proj->name ?? 'Projeto #' . $proj->id) ?></h3>
                             <p class="text-uppercase small mb-2" style="color: var(--mst-gold); letter-spacing: 2px;">
                                 Status: <?= esc($proj->status) ?>
                             </p>

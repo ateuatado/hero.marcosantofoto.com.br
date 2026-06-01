@@ -16,6 +16,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Ensaio / Evento</th>
                     <th>Cliente</th>
                     <th>Pacote</th>
                     <th>Status</th>
@@ -27,6 +28,7 @@
                     <?php foreach ($projects as $proj): ?>
                         <tr>
                             <td><?= esc($proj->id) ?></td>
+                            <td><strong><?= esc($proj->name ?? 'Ensaio sem nome') ?></strong></td>
                             <td><?= esc($proj->user_name) ?></td>
                             <td><?= esc($proj->package_name) ?></td>
                             <td>
