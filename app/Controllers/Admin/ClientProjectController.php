@@ -226,10 +226,18 @@ class ClientProjectController extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        $bucket    = trim(getenv('AWS_S3_BUCKET'), '"\' ');
-        $accessKey = trim(getenv('AWS_ACCESS_KEY_ID'), '"\' ');
-        $secretKey = trim(getenv('AWS_SECRET_ACCESS_KEY'), '"\' ');
-        $region    = trim(getenv('AWS_REGION') ?: 'us-east-2', '"\' ');
+        $bucket    = trim(env('AWS_S3_BUCKET') ?? getenv('AWS_S3_BUCKET') ?? '', '"\' ');
+        $accessKey = trim(env('AWS_ACCESS_KEY_ID') ?? getenv('AWS_ACCESS_KEY_ID') ?? '', '"\' ');
+        $secretKey = trim(env('AWS_SECRET_ACCESS_KEY') ?? getenv('AWS_SECRET_ACCESS_KEY') ?? '', '"\' ');
+        $region    = trim(env('AWS_REGION') ?? getenv('AWS_REGION') ?? 'us-east-2', '"\' ');
+
+        // Fallback robust para superglobais se as funções retornarem vazio
+        if (empty($accessKey) || empty($secretKey)) {
+            $accessKey = trim($_ENV['AWS_ACCESS_KEY_ID'] ?? $_SERVER['AWS_ACCESS_KEY_ID'] ?? '', '"\' ');
+            $secretKey = trim($_ENV['AWS_SECRET_ACCESS_KEY'] ?? $_SERVER['AWS_SECRET_ACCESS_KEY'] ?? '', '"\' ');
+            $bucket    = trim($_ENV['AWS_S3_BUCKET'] ?? $_SERVER['AWS_S3_BUCKET'] ?? '', '"\' ');
+            $region    = trim($_ENV['AWS_REGION'] ?? $_SERVER['AWS_REGION'] ?? 'us-east-2', '"\' ');
+        }
 
         // Limpa caracteres especiais do nome para gerar o nome do arquivo
         $cleanName = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $project->name);
@@ -308,7 +316,7 @@ class ClientProjectController extends BaseController
         $content .= "echo --------------------------------------------------------\r\n";
         $content .= "echo.\r\n\r\n";
         $content .= ":: Monta o S3 usando flags de linha de comando diretas para garantir que a sessao do WinFsp herde as credenciais\r\n";
-        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider=AWS --s3-access-key-id=" . $accessKey . " --s3-secret-access-key=" . $secretKey . " --s3-region=" . $region . " --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider=\"AWS\" --s3-access-key-id=\"" . $accessKey . "\" --s3-secret-access-key=\"" . $secretKey . "\" --s3-region=\"" . $region . "\" --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
         $content .= "if %ERRORLEVEL% neq 0 (\r\n";
         $content .= "    color 0C\r\n";
         $content .= "    echo.\r\n";
