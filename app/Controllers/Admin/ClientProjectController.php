@@ -307,16 +307,8 @@ class ClientProjectController extends BaseController
         $content .= "echo   Tethering ativo! Salve as fotos direto na unidade S:\r\n";
         $content .= "echo --------------------------------------------------------\r\n";
         $content .= "echo.\r\n\r\n";
-        $content .= ":: Configura o remote 'estudio' on-the-fly via variaveis de ambiente\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_TYPE=s3\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_PROVIDER=AWS\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_ACCESS_KEY_ID=" . $accessKey . "\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_SECRET_ACCESS_KEY=" . $secretKey . "\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_REGION=" . $region . "\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_NO_HEAD=true\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_NO_HEAD_OBJECT=true\r\n";
-        $content .= "set RCLONE_CONFIG_ESTUDIO_NO_CHECK_BUCKET=true\r\n\r\n";
-        $content .= "%RCLONE_BIN% mount estudio:" . $bucket . "/originals/" . $id . "/ S: --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= ":: Monta o S3 usando flags de linha de comando diretas para garantir que a sessao do WinFsp herde as credenciais\r\n";
+        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider=AWS --s3-access-key-id=" . $accessKey . " --s3-secret-access-key=" . $secretKey . " --s3-region=" . $region . " --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
         $content .= "if %ERRORLEVEL% neq 0 (\r\n";
         $content .= "    color 0C\r\n";
         $content .= "    echo.\r\n";
