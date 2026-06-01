@@ -51,11 +51,11 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->resource('categories', ['controller' => 'Admin\CategoryController', 'websafe' => 1]);
 
     // Projetos de clientes + sync S3
-    $routes->resource('client-projects', ['controller' => 'Admin\ClientProjectController', 'websafe' => 1]);
     $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
     $routes->get( 'client-projects/(:num)/poll',     'Admin\ClientProjectController::pollInteractions/$1');
     $routes->post('client-projects/(:num)/sync-s3',  'Admin\ClientProjectController::syncS3/$1');
     $routes->get( 'client-projects/(:num)/download-bat', 'Admin\ClientProjectController::downloadBat/$1');
+    $routes->resource('client-projects', ['controller' => 'Admin\ClientProjectController', 'websafe' => 1]);
 
     // Hero CRUD (resource por último para não sobrescrever rotas acima)
     $routes->resource('heroes', ['controller' => 'Admin\HeroController', 'websafe' => 1]);
