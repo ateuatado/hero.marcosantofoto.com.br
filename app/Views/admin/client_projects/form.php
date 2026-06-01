@@ -35,7 +35,7 @@
                     <option value="">Selecione...</option>
                     <?php foreach ($users as $u): ?>
                         <?php $selected = (isset($project) && $project->user_id == $u->id) ? 'selected' : ''; ?>
-                        <option value="<?= esc($u->id) ?>" <?= $selected ?>><?= esc($u->username ?? $u->email) ?></option>
+                        <option value="<?= esc($u->id) ?>" <?= $selected ?>><?= esc($u->email) ?> (<?= esc($u->username) ?>)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
