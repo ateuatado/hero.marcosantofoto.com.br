@@ -293,8 +293,11 @@ class ClientProjectController extends BaseController
         $content .= "if exist S:\\ (\r\n";
         $content .= "    echo [!] O Disco S: ja parece estar montado ou em uso.\r\n";
         $content .= "    echo [!] Tentando desmontar conexoes anteriores...\r\n";
-        $content .= "    net use S: /delete /y >nul 2>nul\r\n";
         $content .= "    taskkill /f /im rclone.exe >nul 2>nul\r\n";
+        $content .= "    net use S: /delete /y >nul 2>nul\r\n";
+        $content .= "    subst S: /D >nul 2>nul\r\n";
+        $content .= "    echo [!] Aguardando o Windows liberar o Disco S:...\r\n";
+        $content .= "    timeout /t 3 /nobreak >nul\r\n";
         $content .= ")\r\n\r\n";
         $content .= "echo [+] Montando o Disco S: apontando diretamente para o ensaio...\r\n";
         $content .= "echo.\r\n";
