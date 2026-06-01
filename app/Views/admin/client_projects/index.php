@@ -37,6 +37,7 @@
                                 </span>
                             </td>
                             <td class="text-end">
+                                <a href="<?= site_url('admin/client-projects/' . $proj->id . '/download-bat') ?>" class="btn btn-sm btn-outline-warning" title="Baixar Script de Conexão (.bat) para o Estúdio"><i class="fas fa-file-download me-1"></i> Conectar</a>
                                 <a href="<?= site_url('admin/client-projects/' . $proj->id . '/photos') ?>" class="btn btn-sm btn-outline-info">Ver Fotos</a>
                                 <a href="<?= site_url('admin/client-projects/' . $proj->id . '/edit') ?>" class="btn btn-sm btn-outline-light">Editar</a>
                                 <form action="<?= site_url('admin/client-projects/' . $proj->id) ?>" method="post" class="d-inline" onsubmit="return confirm('Excluir este projeto?');">

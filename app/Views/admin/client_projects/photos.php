@@ -202,6 +202,9 @@
             <div class="live-dot"></div>
             <span>Monitorando Interações</span>
         </div>
+        <a href="<?= site_url('admin/client-projects/' . $project->id . '/download-bat') ?>" class="btn btn-outline-gold" title="Baixar script (.bat) para conectar a câmera/tethering diretamente ao Disco S:">
+            <i class="fas fa-file-download me-1"></i> Script Estúdio (.bat)
+        </a>
         <a href="<?= site_url('admin/client-projects') ?>" class="btn btn-outline-secondary">Voltar</a>
     </div>
 </div>

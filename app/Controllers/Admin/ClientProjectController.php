@@ -215,4 +215,113 @@ class ClientProjectController extends BaseController
             ]);
         }
     }
+
+    /**
+     * Gera e envia para download o script .bat de conexão automática do rclone para o estúdio.
+     */
+    public function downloadBat($id)
+    {
+        $project = $this->projectModel->find($id);
+        if (!$project) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $bucket    = getenv('AWS_S3_BUCKET');
+        $accessKey = getenv('AWS_ACCESS_KEY_ID');
+        $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
+        $region    = getenv('AWS_REGION') ?: 'us-east-2';
+
+        // Limpa caracteres especiais do nome para gerar o nome do arquivo
+        $cleanName = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $project->name);
+        $cleanName = mb_ereg_replace("([\.]{2,})", '', $cleanName);
+        $cleanName = str_replace(' ', '_', $cleanName);
+        $filename  = "conectar_ensaio_" . $id . "_" . strtolower($cleanName) . ".bat";
+
+        // Conteúdo do BAT com CRLF do Windows
+        $content  = "@echo off\r\n";
+        $content .= ":: ==========================================\r\n";
+        $content .= ":: SCRIPT DE CONEXAO AUTOMATICA - ESTUDIO HERO\r\n";
+        $content .= ":: Ensaio: " . esc($project->name) . "\r\n";
+        $content .= ":: ID do Ensaio: " . $id . "\r\n";
+        $content .= ":: ==========================================\r\n";
+        $content .= "title Conectar Ensaio - " . esc($project->name) . "\r\n";
+        $content .= "color 06\r\n\r\n";
+        $content .= "echo ========================================================\r\n";
+        $content .= "echo         ESTUDIO MARCO SANTO FOTO - HERO\r\n";
+        $content .= "echo ========================================================\r\n";
+        $content .= "echo  Conectando ao S3 de forma 100% transparente...\r\n";
+        $content .= "echo  Ensaio: " . esc($project->name) . " (ID: " . $id . ")\r\n";
+        $content .= "echo  Diretorio S3: originals/" . $id . "\r\n";
+        $content .= "echo ========================================================\r\n";
+        $content .= "echo.\r\n\r\n";
+        $content .= ":: 1. Verificar se rclone esta no PATH\r\n";
+        $content .= "where rclone >nul 2>nul\r\n";
+        $content .= "if %ERRORLEVEL% equ 0 (\r\n";
+        $content .= "    set RCLONE_BIN=rclone\r\n";
+        $content .= "    goto :rclone_found\r\n";
+        $content .= ")\r\n\r\n";
+        $content .= ":: 2. Verificar em caminhos comuns\r\n";
+        $content .= "if exist \"C:\\rclone\\rclone.exe\" (\r\n";
+        $content .= "    set RCLONE_BIN=\"C:\\rclone\\rclone.exe\"\r\n";
+        $content .= "    goto :rclone_found\r\n";
+        $content .= ")\r\n\r\n";
+        $content .= "if exist \"%USERPROFILE%\\rclone\\rclone.exe\" (\r\n";
+        $content .= "    set RCLONE_BIN=\"%USERPROFILE%\\rclone\\rclone.exe\"\r\n";
+        $content .= "    goto :rclone_found\r\n";
+        $content .= ")\r\n\r\n";
+        $content .= "if exist \"rclone.exe\" (\r\n";
+        $content .= "    set RCLONE_BIN=\"rclone.exe\"\r\n";
+        $content .= "    goto :rclone_found\r\n";
+        $content .= ")\r\n\r\n";
+        $content .= ":: Se nao encontrou rclone\r\n";
+        $content .= "color 0C\r\n";
+        $content .= "echo [ERRO] O rclone.exe nao foi localizado no seu computador.\r\n";
+        $content .= "echo.\r\n";
+        $content .= "echo Para que a conexao funcione:\r\n";
+        $content .= "echo 1. Baixe o Rclone para Windows em: https://rclone.org/downloads/\r\n";
+        $content .= "echo 2. Extraia o arquivo \"rclone.exe\" para uma pasta de sua escolha.\r\n";
+        $content .= "echo 3. Recomendacao: Coloque na pasta C:\\rclone\\ ou execute este script na mesma pasta do rclone.exe.\r\n";
+        $content .= "echo.\r\n";
+        $content .= "echo Alem disso, certifique-se de ter o WinFsp instalado:\r\n";
+        $content .= "echo https://winfsp.dev/rel/\r\n";
+        $content .= "echo.\r\n";
+        $content .= "pause\r\n";
+        $content .= "exit\r\n\r\n";
+        $content .= ":rclone_found\r\n";
+        $content .= "echo [+] Executavel do Rclone encontrado: %RCLONE_BIN%\r\n";
+        $content .= "echo [+] Verificando se o Disco S: ja esta em uso...\r\n";
+        $content .= "if exist S:\\ (\r\n";
+        $content .= "    echo [!] O Disco S: ja parece estar montado ou em uso.\r\n";
+        $content .= "    echo [!] Tentando desmontar conexoes anteriores...\r\n";
+        $content .= "    net use S: /delete /y >nul 2>nul\r\n";
+        $content .= "    taskkill /f /im rclone.exe >nul 2>nul\r\n";
+        $content .= ")\r\n\r\n";
+        $content .= "echo [+] Montando o Disco S: apontando diretamente para o ensaio...\r\n";
+        $content .= "echo.\r\n";
+        $content .= "echo --------------------------------------------------------\r\n";
+        $content .= "echo   SUCESSO! O Disco S: foi iniciado.\r\n";
+        $content .= "echo   Mantenha esta janela ABERTA durante as fotos.\r\n";
+        $content .= "echo   Tethering ativo! Salve as fotos direto na unidade S:\r\n";
+        $content .= "echo --------------------------------------------------------\r\n";
+        $content .= "echo.\r\n\r\n";
+        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . " S: --s3-access-key-id=" . $accessKey . " --s3-secret-access-key=" . $secretKey . " --s3-region=" . $region . " --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= "if %ERRORLEVEL% neq 0 (\r\n";
+        $content .= "    color 0C\r\n";
+        $content .= "    echo.\r\n";
+        $content .= "    echo [ERRO] Houve um problema ao montar o Disco S.\r\n";
+        $content .= "    echo Possiveis causas:\r\n";
+        $content .= "    echo 1. O WinFsp nao esta instalado. Instale de: https://winfsp.dev/rel/\r\n";
+        $content .= "    echo 2. O Disco S: ja esta sendo usado por outro recurso.\r\n";
+        $content .= "    echo 3. Sem conexao com a internet.\r\n";
+        $content .= "    echo.\r\n";
+        $content .= "    pause\r\n";
+        $content .= ")\r\n";
+
+        return $this->response->setHeader('Content-Type', 'application/octet-stream')
+                                ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                                ->setHeader('Expires', '0')
+                                ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
+                                ->setHeader('Pragma', 'public')
+                                ->setBody($content);
+    }
 }
