@@ -87,6 +87,33 @@
             <a class="navbar-brand" href="<?= site_url('/') ?>">
                 Marco Santo <span class="nav-sub">Alta Performance</span>
             </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPublic" aria-controls="navPublic" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navPublic">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <?php if (auth()->loggedIn()): ?>
+                        <?php if (auth()->user()->inGroup('admin', 'superadmin', 'developer')): ?>
+                            <li class="nav-item">
+                                <a class="nav-link text-info fw-bold" href="<?= site_url('admin') ?>">Painel Admin</a>
+                            </li>
+                        <?php else: ?>
+                            <li class="nav-item">
+                                <a class="nav-link text-gold fw-bold" href="<?= site_url('client/galeria') ?>"><i class="fas fa-camera me-1"></i> Minhas Galerias</a>
+                            </li>
+                        <?php endif; ?>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-danger btn-sm px-3" href="<?= site_url('logout') ?>" style="font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;">Sair</a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-terroso btn-sm px-4" href="<?= site_url('login') ?>">Entrar</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
         </div>
     </nav>
 
