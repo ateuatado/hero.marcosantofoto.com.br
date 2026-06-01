@@ -316,7 +316,7 @@ class ClientProjectController extends BaseController
         $content .= "echo --------------------------------------------------------\r\n";
         $content .= "echo.\r\n\r\n";
         $content .= ":: Monta o S3 usando flags de linha de comando diretas para garantir que a sessao do WinFsp herde as credenciais\r\n";
-        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider=\"AWS\" --s3-access-key-id=\"" . $accessKey . "\" --s3-secret-access-key=\"" . $secretKey . "\" --s3-region=\"" . $region . "\" --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider \"AWS\" --s3-access-key-id \"" . $accessKey . "\" --s3-secret-access-key \"" . $secretKey . "\" --s3-region \"" . $region . "\" --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
         $content .= "if %ERRORLEVEL% neq 0 (\r\n";
         $content .= "    color 0C\r\n";
         $content .= "    echo.\r\n";
