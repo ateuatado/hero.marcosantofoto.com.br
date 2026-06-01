@@ -314,8 +314,9 @@ class ClientProjectController extends BaseController
         $content .= "set RCLONE_CONFIG_ESTUDIO_SECRET_ACCESS_KEY=" . $secretKey . "\r\n";
         $content .= "set RCLONE_CONFIG_ESTUDIO_REGION=" . $region . "\r\n";
         $content .= "set RCLONE_CONFIG_ESTUDIO_NO_HEAD=true\r\n";
+        $content .= "set RCLONE_CONFIG_ESTUDIO_NO_HEAD_OBJECT=true\r\n";
         $content .= "set RCLONE_CONFIG_ESTUDIO_NO_CHECK_BUCKET=true\r\n\r\n";
-        $content .= "%RCLONE_BIN% mount estudio:" . $bucket . "/originals/" . $id . " S: --s3-no-head --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= "%RCLONE_BIN% mount estudio:" . $bucket . "/originals/" . $id . "/ S: --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
         $content .= "if %ERRORLEVEL% neq 0 (\r\n";
         $content .= "    color 0C\r\n";
         $content .= "    echo.\r\n";
