@@ -19,6 +19,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
+        align-items: start;
     }
 
     .photo-item {
@@ -45,135 +46,36 @@
     .photo-wrapper {
         position: relative;
         width: 100%;
-        height: 280px;
+        height: auto;
         overflow: hidden;
         background: #0d0d0d;
+        display: block;
     }
 
     .photo-wrapper img {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
+        height: auto;
+        display: block;
         transition: transform 0.5s ease;
     }
 
     .photo-item:hover .photo-wrapper img {
-        transform: scale(1.05);
+        transform: scale(1.03);
     }
 
-    /* Overlay no hover */
-    .photo-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.85) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 12px;
-        pointer-events: none;
-    }
-
-    .photo-item:hover .photo-overlay,
-    .photo-item.selected .photo-overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    /* Botão de seleção premium */
-    .select-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 36px;
-        height: 36px;
-        background: rgba(0, 0, 0, 0.65);
-        backdrop-filter: blur(8px);
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        color: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 10;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .photo-item.selected .select-badge {
-        background: var(--mst-gold);
-        border-color: var(--mst-gold);
-        color: #000;
-        transform: scale(1.1);
-        box-shadow: 0 0 15px var(--mst-gold);
-    }
-
-    /* Botão de Amei/Coração */
-    .love-btn {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 36px;
-        height: 36px;
-        background: rgba(0, 0, 0, 0.65);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: rgba(255, 255, 255, 0.7);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 10;
-    }
-
-    .love-btn:hover {
-        transform: scale(1.1);
-        color: #ff4757;
-        background: rgba(0, 0, 0, 0.8);
-    }
-
-    .love-btn.loved {
-        background: rgba(255, 71, 87, 0.15);
-        border-color: #ff4757;
-        color: #ff4757;
-        transform: scale(1.1);
-        animation: heartBeat 0.4s ease-out;
-    }
-
-    @keyframes heartBeat {
-        0% { transform: scale(1); }
-        35% { transform: scale(1.3); }
-        70% { transform: scale(0.9); }
-        100% { transform: scale(1.1); }
-    }
-
-    /* Classificação de estrelas */
+    /* Classificação de estrelas sempre visível */
     .rating-bar {
-        background: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 30px;
-        padding: 6px 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        margin: 0 auto;
+        gap: 6px;
         opacity: 0.9;
         transition: all 0.3s ease;
     }
 
     .star-icon {
         font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.2);
         cursor: pointer;
         transition: all 0.2s ease;
     }
@@ -183,6 +85,73 @@
         color: var(--mst-gold);
         transform: scale(1.2);
         text-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
+    }
+
+    /* Botão de Amei/Coração Premium */
+    .btn-love {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-love:hover {
+        color: #ff4757;
+        background: rgba(255, 71, 87, 0.1);
+        border-color: rgba(255, 71, 87, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-love.loved {
+        background: #ff4757;
+        border-color: #ff4757;
+        color: #fff !important;
+        box-shadow: 0 0 12px rgba(255, 71, 87, 0.45);
+        animation: heartBeat 0.4s ease-out;
+    }
+
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        35% { transform: scale(1.2); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+
+    /* Botão de Selecionar Premium */
+    .btn-select {
+        background: rgba(197, 160, 89, 0.06);
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        color: var(--mst-gold);
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-select:hover {
+        background: var(--mst-gold);
+        color: #000;
+        border-color: var(--mst-gold);
+        box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-select.selected {
+        background: #2ed573;
+        border-color: #2ed573;
+        color: #000;
+        font-weight: 700;
+        box-shadow: 0 0 12px rgba(46, 213, 115, 0.45);
     }
 
     /* Info do rodapé do card */
@@ -217,7 +186,7 @@
     .floating-bar {
         position: fixed;
         bottom: 0;
-        left: 0;
+        left: 0; left: 0;
         right: 0;
         background: rgba(10, 10, 10, 0.92);
         backdrop-filter: blur(20px);
@@ -376,42 +345,48 @@
             <?php foreach ($photos as $i => $photo): ?>
                 <div class="photo-item <?= $photo->status === 'selected' ? 'selected' : '' ?>" id="photo-card-<?= $photo->id ?>" data-id="<?= $photo->id ?>">
                     
-                    <!-- Botões de Ação Instantânea -->
-                    <button class="love-btn <?= $photo->is_loved == 1 ? 'loved' : '' ?>" 
-                            onclick="toggleLove(<?= $project->id ?>, <?= $photo->id ?>, this, event)" 
-                            title="Amei esta foto">
-                        <i class="fas fa-heart"></i>
-                    </button>
-
-                    <div class="select-badge" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this, event)" title="Selecionar para o pacote">
-                        <i class="fas <?= $photo->status === 'selected' ? 'fa-check' : 'fa-plus' ?>"></i>
-                    </div>
-
-                    <!-- Imagem Proxy -->
-                    <div class="photo-wrapper" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this.closest('.photo-item').querySelector('.select-badge'), event)">
+                    <!-- Imagem Proxy em Aspecto Total -->
+                    <div class="photo-wrapper" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this.closest('.photo-item').querySelector('.select-btn'), event)">
                         <?php if (!empty($photo->presigned_url)): ?>
-                            <img src="<?= esc($photo->presigned_url) ?>" alt="Foto <?= $i + 1 ?>" loading="lazy">
+                            <img src="<?= esc($photo->presigned_url) ?>" alt="Foto <?= $i + 1 ?>" class="gallery-img" loading="lazy">
                         <?php else: ?>
                             <div class="photo-skeleton"></div>
                         <?php endif; ?>
+                    </div>
 
-                        <!-- Overlay com Estrelas -->
-                        <div class="photo-overlay">
-                            <div></div>
-                            <div class="rating-bar" onclick="event.stopPropagation()">
-                                <?php for ($s = 1; $s <= 5; $s++): ?>
-                                    <i class="fas fa-star star-icon <?= $s <= $photo->rating ? 'active' : '' ?>" 
-                                       data-value="<?= $s ?>" 
-                                       onclick="setRating(<?= $project->id ?>, <?= $photo->id ?>, <?= $s ?>, this)"></i>
-                                <?php endfor; ?>
-                            </div>
+                    <!-- Barra de Avaliação (Estrelas) - Sempre Visível -->
+                    <div class="rating-container py-2 text-center border-bottom border-secondary" style="background: rgba(0,0,0,0.35);">
+                        <div class="rating-bar d-inline-flex gap-2">
+                            <?php for ($s = 1; $s <= 5; $s++): ?>
+                                <i class="fas fa-star star-icon <?= $s <= $photo->rating ? 'active' : '' ?>" 
+                                   data-value="<?= $s ?>" 
+                                   onclick="setRating(<?= $project->id ?>, <?= $photo->id ?>, <?= $s ?>, this)"></i>
+                            <?php endfor; ?>
                         </div>
                     </div>
 
-                    <!-- Rodapé do Card -->
-                    <div class="photo-footer">
-                        <span class="photo-name" title="<?= esc($photo->original_filename) ?>"><?= esc($photo->original_filename) ?></span>
-                        <span class="photo-index">#<?= $i + 1 ?></span>
+                    <!-- Rodapé do Card com Nome e Ações Explícitas -->
+                    <div class="photo-footer d-flex flex-column gap-2 p-3" style="background: #121212;">
+                        <div class="d-flex justify-content-between align-items-center mb-1 w-100">
+                            <span class="photo-name text-muted text-truncate" style="max-width: 170px;" title="<?= esc($photo->original_filename) ?>"><?= esc($photo->original_filename) ?></span>
+                            <span class="photo-index">#<?= $i + 1 ?></span>
+                        </div>
+                        
+                        <div class="d-flex gap-2 w-100 mt-1">
+                            <!-- Botão Amei (Coração) -->
+                            <button class="btn btn-love w-25 <?= $photo->is_loved == 1 ? 'loved' : '' ?>" 
+                                    onclick="toggleLove(<?= $project->id ?>, <?= $photo->id ?>, this, event)" 
+                                    title="Amei esta foto">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            
+                            <!-- Botão Selecionar -->
+                            <button class="btn btn-select w-75 select-btn <?= $photo->status === 'selected' ? 'selected' : '' ?>" 
+                                    onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this, event)">
+                                <i class="fas <?= $photo->status === 'selected' ? 'fa-check-circle' : 'fa-plus-circle' ?> me-1"></i>
+                                <span class="btn-text"><?= $photo->status === 'selected' ? 'Selecionada' : 'Selecionar' ?></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -564,19 +539,26 @@
         .then(data => {
             if (data.success) {
                 const icon = badge.querySelector('i');
+                const btnText = badge.querySelector('.btn-text');
                 if (data.status === 'selected') {
                     card.classList.add('selected');
+                    badge.classList.add('selected');
                     selectedIds.add(photoId);
                     if (icon) {
-                        icon.classList.remove('fa-plus');
-                        icon.classList.add('fa-check');
+                        icon.className = 'fas fa-check-circle me-1';
+                    }
+                    if (btnText) {
+                        btnText.textContent = 'Selecionada';
                     }
                 } else {
                     card.classList.remove('selected');
+                    badge.classList.remove('selected');
                     selectedIds.delete(photoId);
                     if (icon) {
-                        icon.classList.remove('fa-check');
-                        icon.classList.add('fa-plus');
+                        icon.className = 'fas fa-plus-circle me-1';
+                    }
+                    if (btnText) {
+                        btnText.textContent = 'Selecionar';
                     }
                 }
                 updateFloatingBar();
@@ -670,7 +652,7 @@
                             existingPhotoIds.add(id);
 
                             const card = document.createElement('div');
-                            card.className = 'photo-item fade-in-item';
+                            card.className = `photo-item ${photo.status === 'selected' ? 'selected' : ''}`;
                             card.id = `photo-card-${id}`;
                             card.dataset.id = id;
 
@@ -683,26 +665,31 @@
                             }
 
                             card.innerHTML = `
-                                <button class="love-btn ${photo.is_loved == 1 ? 'loved' : ''}" 
-                                        onclick="toggleLove(${projectId}, ${id}, this, event)" 
-                                        title="Amei esta foto">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                                <div class="select-badge" onclick="toggleSelect(${projectId}, ${id}, this, event)">
-                                    <i class="fas ${photo.status === 'selected' ? 'fa-check' : 'fa-plus'}"></i>
+                                <div class="photo-wrapper" onclick="toggleSelect(${projectId}, ${id}, this.closest('.photo-item').querySelector('.select-btn'), event)">
+                                    <img src="${photo.presigned_url}" alt="Foto ${index + 1}" class="gallery-img" loading="lazy">
                                 </div>
-                                <div class="photo-wrapper" onclick="toggleSelect(${projectId}, ${id}, this.closest('.photo-item').querySelector('.select-badge'), event)">
-                                    <img src="${photo.presigned_url}" alt="Foto ${index + 1}">
-                                    <div class="photo-overlay">
-                                        <div></div>
-                                        <div class="rating-bar" onclick="event.stopPropagation()">
-                                            ${starsHtml}
-                                        </div>
+                                <div class="rating-container py-2 text-center border-bottom border-secondary" style="background: rgba(0,0,0,0.35);">
+                                    <div class="rating-bar d-inline-flex gap-2">
+                                        ${starsHtml}
                                     </div>
                                 </div>
-                                <div class="photo-footer">
-                                    <span class="photo-name" title="${photo.original_filename}">${photo.original_filename}</span>
-                                    <span class="photo-index">#${index + 1}</span>
+                                <div class="photo-footer d-flex flex-column gap-2 p-3" style="background: #121212;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1 w-100">
+                                        <span class="photo-name text-muted text-truncate" style="max-width: 170px;" title="${photo.original_filename}">${photo.original_filename}</span>
+                                        <span class="photo-index">#${index + 1}</span>
+                                    </div>
+                                    <div class="d-flex gap-2 w-100 mt-1">
+                                        <button class="btn btn-love w-25 ${photo.is_loved == 1 ? 'loved' : ''}" 
+                                                onclick="toggleLove(${projectId}, ${id}, this, event)" 
+                                                title="Amei esta foto">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button class="btn btn-select w-75 select-btn ${photo.status === 'selected' ? 'selected' : ''}" 
+                                                onclick="toggleSelect(${projectId}, ${id}, this, event)">
+                                            <i class="fas ${photo.status === 'selected' ? 'fa-check-circle' : 'fa-plus-circle'} me-1"></i>
+                                            <span class="btn-text">${photo.status === 'selected' ? 'Selecionada' : 'Selecionar'}</span>
+                                        </button>
+                                    </div>
                                 </div>
                             `;
 
@@ -710,7 +697,6 @@
                             
                             // Se já estiver marcada como selecionada na sincronização remota, atualiza o set local
                             if (photo.status === 'selected') {
-                                card.classList.add('selected');
                                 selectedIds.add(id);
                             }
                         } else {
@@ -718,7 +704,7 @@
                             const existingCard = document.getElementById(`photo-card-${id}`);
                             if (existingCard) {
                                 // Atualiza o Love
-                                const loveBtn = existingCard.querySelector('.love-btn');
+                                const loveBtn = existingCard.querySelector('.btn-love');
                                 if (loveBtn) {
                                     loveBtn.classList.toggle('loved', photo.is_loved == 1);
                                 }
@@ -731,22 +717,21 @@
                                 });
 
                                 // Sincroniza o status de Seleção local caso tenha mudado remotamente
-                                const badge = existingCard.querySelector('.select-badge');
-                                const icon = badge ? badge.querySelector('i') : null;
+                                const selectBtn = existingCard.querySelector('.select-btn');
+                                const selectIcon = selectBtn ? selectBtn.querySelector('i') : null;
+                                const selectSpan = selectBtn ? selectBtn.querySelector('.btn-text') : null;
                                 if (photo.status === 'selected') {
                                     existingCard.classList.add('selected');
                                     selectedIds.add(id);
-                                    if (icon) {
-                                        icon.classList.remove('fa-plus');
-                                        icon.classList.add('fa-check');
-                                    }
+                                    if (selectBtn) selectBtn.classList.add('selected');
+                                    if (selectIcon) selectIcon.className = 'fas fa-check-circle me-1';
+                                    if (selectSpan) selectSpan.textContent = 'Selecionada';
                                 } else {
                                     existingCard.classList.remove('selected');
                                     selectedIds.delete(id);
-                                    if (icon) {
-                                        icon.classList.remove('fa-check');
-                                        icon.classList.add('fa-plus');
-                                    }
+                                    if (selectBtn) selectBtn.classList.remove('selected');
+                                    if (selectIcon) selectIcon.className = 'fas fa-plus-circle me-1';
+                                    if (selectSpan) selectSpan.textContent = 'Selecionar';
                                 }
                             }
                         }
