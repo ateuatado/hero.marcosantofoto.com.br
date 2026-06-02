@@ -52,6 +52,18 @@
         display: block;
     }
 
+    .photo-protection-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        background: transparent;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
     .photo-wrapper img {
         width: 100%;
         height: auto;
@@ -347,6 +359,7 @@
                     
                     <!-- Imagem Proxy em Aspecto Total -->
                     <div class="photo-wrapper" onclick="toggleSelect(<?= $project->id ?>, <?= $photo->id ?>, this.closest('.photo-item').querySelector('.select-btn'), event)">
+                        <div class="photo-protection-overlay"></div>
                         <?php if (!empty($photo->presigned_url)): ?>
                             <img src="<?= esc($photo->presigned_url) ?>" alt="Foto <?= $i + 1 ?>" class="gallery-img" loading="lazy">
                         <?php else: ?>
@@ -666,6 +679,7 @@
 
                             card.innerHTML = `
                                 <div class="photo-wrapper" onclick="toggleSelect(${projectId}, ${id}, this.closest('.photo-item').querySelector('.select-btn'), event)">
+                                    <div class="photo-protection-overlay"></div>
                                     <img src="${photo.presigned_url}" alt="Foto ${index + 1}" class="gallery-img" loading="lazy">
                                 </div>
                                 <div class="rating-container py-2 text-center border-bottom border-secondary" style="background: rgba(0,0,0,0.35);">
@@ -752,5 +766,39 @@
     // Inicializa a UI ao carregar a página
     updateFloatingBar();
     startRealTimeSync();
+
+    // Bloqueia clique com o botão direito nas imagens e no wrapper da galeria
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.classList.contains('gallery-img') || e.target.classList.contains('photo-protection-overlay') || e.target.closest('.photo-wrapper')) {
+            e.preventDefault();
+        }
+    });
+
+    // Bloqueia arrastar e soltar (drag and drop) de imagens
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.classList.contains('gallery-img') || e.target.classList.contains('photo-protection-overlay') || e.target.closest('.photo-wrapper')) {
+            e.preventDefault();
+        }
+    });
+
+    // Bloqueia atalhos comuns de teclado para salvar e inspecionar
+    document.addEventListener('keydown', function(e) {
+        // Bloqueia F12 (DevTools)
+        if (e.key === 'F12') {
+            e.preventDefault();
+        }
+        // Bloqueia Ctrl+S ou Cmd+S (Salvar página)
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+        }
+        // Bloqueia Ctrl+U ou Cmd+U (Ver código-fonte)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+            e.preventDefault();
+        }
+        // Bloqueia Ctrl+Shift+I ou Cmd+Opt+I (Inspecionar)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+            e.preventDefault();
+        }
+    });
 </script>
 <?= $this->endSection() ?>

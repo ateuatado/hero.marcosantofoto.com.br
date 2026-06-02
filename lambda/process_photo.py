@@ -35,8 +35,8 @@ s3 = boto3.client("s3")
 
 # ─── Configurações via variáveis de ambiente ──────────────────────────────────
 WATERMARK_KEY      = os.environ.get("WATERMARK_KEY", "assets/logo.png")
-PROXY_MAX_SIZE     = int(os.environ.get("PROXY_MAX_SIZE", "1500"))
-PROXY_QUALITY      = int(os.environ.get("PROXY_QUALITY", "75"))
+PROXY_MAX_SIZE     = int(os.environ.get("PROXY_MAX_SIZE", "900"))
+PROXY_QUALITY      = int(os.environ.get("PROXY_QUALITY", "65"))
 WATERMARK_OPACITY  = float(os.environ.get("WATERMARK_OPACITY", "0.35"))
 WATERMARK_SCALE    = float(os.environ.get("WATERMARK_SCALE", "0.20"))  # 20% da largura da foto
 
@@ -54,30 +54,33 @@ def load_watermark(bucket: str) -> Image.Image | None:
 
 def apply_watermark(photo: Image.Image, watermark: Image.Image) -> Image.Image:
     """
-    Aplica o watermark no canto inferior direito da foto.
-    Redimensiona o logo para WATERMARK_SCALE da largura da foto.
+    Aplica o watermark rotacionado diagonalmente no centro da foto.
+    Redimensiona o logo baseado na menor dimensão da foto.
     """
     photo = photo.convert("RGBA")
     
-    # Calcula novo tamanho do logo
-    target_w = int(photo.width * WATERMARK_SCALE)
+    # Calcula tamanho da marca d'água (cerca de 55% da menor dimensão da foto)
+    min_dim = min(photo.width, photo.height)
+    target_w = int(min_dim * 0.55)
     ratio     = target_w / watermark.width
     target_h  = int(watermark.height * ratio)
     wm_resized = watermark.resize((target_w, target_h), Image.LANCZOS)
 
-    # Ajusta opacidade do canal alpha
+    # Ajusta opacidade para ser sutil mas visível no centro (22%)
     r, g, b, a = wm_resized.split()
-    a = a.point(lambda x: int(x * WATERMARK_OPACITY))
+    a = a.point(lambda x: int(x * 0.22))
     wm_resized = Image.merge("RGBA", (r, g, b, a))
 
-    # Posição: canto inferior direito com margem de 2%
-    margin_x = int(photo.width  * 0.02)
-    margin_y = int(photo.height * 0.02)
-    pos = (photo.width - target_w - margin_x, photo.height - target_h - margin_y)
+    # Rotaciona a marca d'água em 30 graus no sentido anti-horário (expand=True para não cortar as bordas giradas)
+    wm_rotated = wm_resized.rotate(30, resample=Image.BICUBIC, expand=True)
+
+    # Centraliza o logotipo rotacionado no canvas da foto
+    pos_x = (photo.width - wm_rotated.width) // 2
+    pos_y = (photo.height - wm_rotated.height) // 2
 
     # Composição
     layer = Image.new("RGBA", photo.size, (0, 0, 0, 0))
-    layer.paste(wm_resized, pos)
+    layer.paste(wm_rotated, (pos_x, pos_y))
     result = Image.alpha_composite(photo, layer)
 
     return result.convert("RGB")
