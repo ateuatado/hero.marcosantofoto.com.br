@@ -33,10 +33,15 @@ try {
       --zip-file fileb://$ZipFile `
       --region us-east-2
     
-    Write-Host "[+] SUCESSO! O codigo do Lambda foi atualizado no AWS." -ForegroundColor Green
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[+] SUCESSO! O codigo do Lambda foi atualizado no AWS." -ForegroundColor Green
+    } else {
+        Write-Host "[!] ERRO: O comando do AWS CLI falhou (Exit Code: $LASTEXITCODE)." -ForegroundColor Red
+        Write-Host "[!] O usuario 'hero-site' nao tem permissao para atualizar codigos de Lambda." -ForegroundColor Yellow
+        Write-Host "[!] Configure o AWS CLI com suas chaves de ADMIN rodando 'aws configure'." -ForegroundColor Yellow
+    }
 } catch {
-    Write-Host "[!] ERRO ao enviar codigo para a AWS: $_" -ForegroundColor Red
-    Write-Host "[!] Verifique se o AWS CLI esta instalado e autenticado com 'aws configure'." -ForegroundColor Yellow
+    Write-Host "[!] ERRO critico ao executar script: $_" -ForegroundColor Red
 }
 
 # Limpeza
