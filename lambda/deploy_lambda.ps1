@@ -15,16 +15,16 @@ if ($ScriptPath) {
 
 # Define nomes dos arquivos
 $ZipFile = "function.zip"
-$SourceFile = "process_photo.py"
+$SourceFiles = @("process_photo.py", "Roboto-Regular.ttf")
 
 # Remove zip antigo se existir
 if (Test-Path $ZipFile) {
     Remove-Item $ZipFile -Force
 }
 
-Write-Host "[+] Compactando $SourceFile para $ZipFile..." -ForegroundColor Cyan
-# Cria arquivo zip contendo apenas o script do Lambda
-Compress-Archive -Path $SourceFile -DestinationPath $ZipFile -Force
+Write-Host "[+] Compactando arquivos de codigo e fonte para $ZipFile..." -ForegroundColor Cyan
+# Cria arquivo zip contendo o script do Lambda e a fonte de texto
+Compress-Archive -Path $SourceFiles -DestinationPath $ZipFile -Force
 
 Write-Host "[+] Atualizando codigo do Lambda na AWS..." -ForegroundColor Cyan
 try {

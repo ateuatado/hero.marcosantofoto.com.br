@@ -52,37 +52,79 @@ def load_watermark(bucket: str) -> Image.Image | None:
         return None
 
 
+def draw_rotated_text(text: str, font: ImageFont.ImageFont, angle: float) -> Image.Image:
+    """Gera uma imagem RGBA com o texto desenhado e rotacionado."""
+    # Calcula tamanho necessário criando uma imagem temporária
+    dummy = Image.new("RGBA", (1, 1))
+    draw = ImageDraw.Draw(dummy)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0] + 16
+    text_h = bbox[3] - bbox[1] + 16
+    
+    txt_img = Image.new("RGBA", (text_w, text_h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(txt_img)
+    
+    # Desenha texto centralizado com borda/sombra suave para legibilidade
+    x_pos = 8
+    y_pos = 8
+    d.text((x_pos + 1, y_pos + 1), text, fill=(0, 0, 0, 35), font=font)
+    d.text((x_pos, y_pos), text, fill=(255, 255, 255, 45), font=font)
+    
+    # Rotaciona
+    return txt_img.rotate(angle, resample=Image.BICUBIC, expand=True)
+
+
 def apply_watermark(photo: Image.Image, watermark: Image.Image) -> Image.Image:
     """
-    Aplica o watermark rotacionado diagonalmente no centro da foto.
-    Redimensiona o logo baseado na menor dimensão da foto.
+    Aplica o watermark rotacionado diagonalmente no centro da foto
+    e adiciona a mensagem 'IMAGEM PARA APROVAÇÃO' em todos os quadrantes da imagem.
     """
     photo = photo.convert("RGBA")
-    
-    # Calcula tamanho da marca d'água (cerca de 55% da menor dimensão da foto)
     min_dim = min(photo.width, photo.height)
-    target_w = int(min_dim * 0.55)
+    
+    # ─── 1. APLICAR LOGO CENTRALIZADO E ROTACIONADO ───────────────────────────
+    target_w = int(min_dim * 0.50)
     ratio     = target_w / watermark.width
     target_h  = int(watermark.height * ratio)
     wm_resized = watermark.resize((target_w, target_h), Image.LANCZOS)
 
-    # Ajusta opacidade para ser sutil mas visível no centro (22%)
     r, g, b, a = wm_resized.split()
     a = a.point(lambda x: int(x * 0.22))
     wm_resized = Image.merge("RGBA", (r, g, b, a))
 
-    # Rotaciona a marca d'água em 30 graus no sentido anti-horário (expand=True para não cortar as bordas giradas)
     wm_rotated = wm_resized.rotate(30, resample=Image.BICUBIC, expand=True)
-
-    # Centraliza o logotipo rotacionado no canvas da foto
     pos_x = (photo.width - wm_rotated.width) // 2
     pos_y = (photo.height - wm_rotated.height) // 2
 
-    # Composição
     layer = Image.new("RGBA", photo.size, (0, 0, 0, 0))
     layer.paste(wm_rotated, (pos_x, pos_y))
-    result = Image.alpha_composite(photo, layer)
+    
+    # ─── 2. ADICIONAR TEXTOS DE APROVAÇÃO NOS QUADRANTES ─────────────────────
+    font_size = max(14, int(min_dim * 0.030))
+    try:
+        font_path = os.path.join(os.path.dirname(__file__), "Roboto-Regular.ttf")
+        font = ImageFont.truetype(font_path, font_size)
+    except Exception:
+        font = ImageFont.load_default()
 
+    text = "IMAGEM PARA APROVAÇÃO"
+    txt_rotated = draw_rotated_text(text, font, 20)
+
+    # Quadrantes: Top-Left, Top-Right, Bottom-Left, Bottom-Right
+    quadrants = [
+        (photo.width // 4, photo.height // 4),
+        (3 * photo.width // 4, photo.height // 4),
+        (photo.width // 4, 3 * photo.height // 4),
+        (3 * photo.width // 4, 3 * photo.height // 4)
+    ]
+
+    for qx, qy in quadrants:
+        px = qx - txt_rotated.width // 2
+        py = qy - txt_rotated.height // 2
+        layer.paste(txt_rotated, (px, py))
+
+    # Composição final
+    result = Image.alpha_composite(photo, layer)
     return result.convert("RGB")
 
 
