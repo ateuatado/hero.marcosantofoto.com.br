@@ -3,9 +3,9 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "==============================================" -ForegroundColor Gold
-Write-Host "   DEPLOIANDO LAMBDA: hero-process-photo      " -ForegroundColor Gold
-Write-Host "==============================================" -ForegroundColor Gold
+Write-Host "==============================================" -ForegroundColor Yellow
+Write-Host "   DEPLOIANDO LAMBDA: hero-process-photo      " -ForegroundColor Yellow
+Write-Host "==============================================" -ForegroundColor Yellow
 
 # Garante que estamos na pasta correta
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
@@ -44,4 +44,4 @@ if (Test-Path $ZipFile) {
     Remove-Item $ZipFile -Force
 }
 
-Write-Host "==============================================" -ForegroundColor Gold
+Write-Host "==============================================" -ForegroundColor Yellow
