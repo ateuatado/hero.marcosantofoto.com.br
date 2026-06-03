@@ -59,25 +59,47 @@ $s3 = new S3Client([
     ],
 ]);
 
+// Busca s3_folder no banco se possivel, caso contrario usa o ID
+$s3Folder = (string)$projectId;
+try {
+    $dbHost = getenv('database.default.hostname') ?: 'localhost';
+    $dbName = getenv('database.default.database') ?: 'hero';
+    $dbUser = getenv('database.default.username') ?: 'root';
+    $dbPass = getenv('database.default.password') ?: '';
+    
+    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4", $dbUser, $dbPass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    ]);
+    
+    $stmt = $pdo->prepare("SELECT s3_folder FROM client_projects WHERE id = :id");
+    $stmt->execute(['id' => $projectId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!empty($row['s3_folder'])) {
+        $s3Folder = $row['s3_folder'];
+    }
+} catch (\Exception $dbEx) {
+    // Ignora erro e mantem fallback no ID
+}
+
 echo "========================================================\n";
 echo "   REPROCESSANDO FOTOS DO ENSAIO (ID: $projectId)      \n";
 echo "========================================================\n";
 echo "Bucket: $bucket\n";
-echo "Prefixo S3: originals/$projectId/\n";
+echo "Prefixo S3: originals/$s3Folder/\n";
 echo "--------------------------------------------------------\n";
 
 try {
-    echo "[+] Listando fotos em originals/$projectId/...\n";
+    echo "[+] Listando fotos em originals/$s3Folder/...\n";
     $result = $s3->listObjectsV2([
         'Bucket' => $bucket,
-        'Prefix' => "originals/$projectId/",
+        'Prefix' => "originals/$s3Folder/",
     ]);
 
     $count = 0;
     foreach ($result['Contents'] ?? [] as $object) {
         $fileKey = $object['Key'];
         // Ignora a pasta em si
-        if ($fileKey === "originals/$projectId/") continue;
+        if ($fileKey === "originals/$s3Folder/") continue;
 
         // Apenas arquivos de imagem ou formato RAW comum
         $ext = strtolower(pathinfo($fileKey, PATHINFO_EXTENSION));

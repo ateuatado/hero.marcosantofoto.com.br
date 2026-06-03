@@ -72,6 +72,10 @@ $routes->post('intentions/store', 'IntentionController::store');
 $routes->get( 'schedule/slots/(:num)', 'ScheduleController::getSlots/$1');
 $routes->post('schedule/book',         'ScheduleController::book');
 
+// ─── API Callback do Lambda (Auto-tagging) ──────────────────────────────────
+$routes->post('api/photo/metadata', 'Api\ApiController::saveMetadata');
+
+
 // ─── Portal do Cliente (autenticado) ──────────────────────────────────────────
 $routes->group('client', ['filter' => 'session'], static function ($routes) {
     $routes->get( 'galeria',                       'Client\GaleriaController::index');

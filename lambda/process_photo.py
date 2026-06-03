@@ -24,7 +24,9 @@ Variáveis de Ambiente Lambda:
 import os
 import io
 import logging
+import json
 import urllib.parse
+import urllib.request
 import boto3
 from PIL import Image, ImageDraw, ImageFont
 
@@ -39,6 +41,248 @@ PROXY_MAX_SIZE     = int(os.environ.get("PROXY_MAX_SIZE", "900"))
 PROXY_QUALITY      = int(os.environ.get("PROXY_QUALITY", "65"))
 WATERMARK_OPACITY  = float(os.environ.get("WATERMARK_OPACITY", "0.35"))
 WATERMARK_SCALE    = float(os.environ.get("WATERMARK_SCALE", "0.20"))  # 20% da largura da foto
+
+# Configurações de API e IA
+HERO_API_URL       = os.environ.get("HERO_API_URL")
+HERO_API_TOKEN     = os.environ.get("HERO_API_TOKEN")
+ENABLE_AI          = os.environ.get("ENABLE_AI", "true").lower() == "true"
+
+# Dicionário de Tradução de Etiquetas do Rekognition (Inglês -> Português)
+TRANSLATION_MAP = {
+    "person": "pessoa",
+    "human": "pessoa",
+    "people": "pessoas",
+    "woman": "mulher",
+    "female": "mulher",
+    "lady": "mulher",
+    "man": "homem",
+    "male": "homem",
+    "child": "criança",
+    "kid": "criança",
+    "boy": "menino",
+    "girl": "menina",
+    "baby": "bebê",
+    "infant": "bebê",
+    "toddler": "bebê",
+    "dog": "cachorro",
+    "canine": "cão",
+    "pet": "pet",
+    "cat": "gato",
+    "feline": "gato",
+    "sitting": "sentado",
+    "seated": "sentado",
+    "standing": "em pé",
+    "smiling": "sorrindo",
+    "smile": "sorriso",
+    "laughter": "risada",
+    "happy": "feliz",
+    "clothing": "roupa",
+    "apparel": "roupa",
+    "garment": "roupa",
+    "shirt": "blusa/camisa",
+    "t-shirt": "camiseta",
+    "blouse": "blusa",
+    "pants": "calça",
+    "trousers": "calça",
+    "jeans": "jeans",
+    "denim": "jeans",
+    "dress": "vestido",
+    "gown": "vestido",
+    "skirt": "saia",
+    "coat": "casaco",
+    "jacket": "jaqueta",
+    "sweater": "casaco",
+    "suit": "terno",
+    "tuxedo": "terno",
+    "blazer": "blazer",
+    "footwear": "calçado",
+    "shoe": "sapato",
+    "boot": "bota",
+    "sneakers": "tênis",
+    "hat": "chapéu",
+    "cap": "boné",
+    "glasses": "óculos",
+    "eyeglasses": "óculos",
+    "sunglasses": "óculos escuros",
+    "hair": "cabelo",
+    "cake": "bolo",
+    "birthday cake": "bolo de aniversário",
+    "flower": "flor",
+    "flowers": "flores",
+    "flora": "flor",
+    "blossom": "flor",
+    "plant": "planta",
+    "vegetation": "planta",
+    "garden": "jardim",
+    "tree": "árvore",
+    "grass": "grama",
+    "beach": "praia",
+    "sand": "areia",
+    "sea": "mar",
+    "ocean": "mar",
+    "water": "água",
+    "sky": "céu",
+    "sun": "sol",
+    "sunny": "sol",
+    "sunlight": "luz solar",
+    "studio": "estúdio",
+    "indoors": "interno",
+    "outdoors": "externo",
+    "nature": "natureza",
+    "furniture": "móveis",
+    "chair": "cadeira",
+    "sofa": "sofá",
+    "couch": "sofá",
+    "table": "mesa",
+    "desk": "mesa",
+    "piano": "piano",
+    "keyboard": "teclado",
+    "musical instrument": "instrumento musical",
+    "guitar": "violão/guitarra",
+    "bed": "cama",
+    "bedroom": "quarto",
+    "kitchen": "cozinha",
+    "sink": "pia",
+    "toy": "brinquedo",
+    "balloon": "balão",
+    "car": "carro",
+    "vehicle": "veículo",
+    "food": "comida",
+    "fruit": "fruta",
+    "wine": "vinho",
+    "glass": "taça/copo",
+    "drink": "bebida",
+    "beverage": "bebida",
+    "ring": "anel",
+    "jewelry": "joia",
+    "book": "livro",
+    "computer": "computador",
+    "laptop": "notebook",
+    "phone": "celular",
+    "mobile phone": "celular",
+    "wall": "parede",
+    "brick": "tijolo",
+    "leather": "couro",
+    "wood": "madeira",
+    "white": "branco",
+    "black": "preto",
+    "red": "vermelho",
+    "blue": "azul",
+    "green": "verde",
+    "yellow": "amarelo",
+    "pink": "rosa",
+    "purple": "roxo",
+    "brown": "marrom",
+    "grey": "cinza",
+    "gray": "cinza",
+    "orange": "laranja"
+}
+
+
+def translate_label(label: str) -> str:
+    """Traduz etiquetas detectadas pelo Rekognition para português usando o mapa local."""
+    label_lower = label.lower().strip()
+    return TRANSLATION_MAP.get(label_lower, label_lower)
+
+
+def analyze_image_with_rekognition(bucket: str, key: str) -> tuple:
+    """
+    Analisa a imagem no S3 usando o Amazon Rekognition.
+    Retorna uma tupla (descricao, lista_de_tags).
+    """
+    try:
+        rek = boto3.client("rekognition", region_name=os.environ.get("AWS_REGION", "us-east-2"))
+        
+        # 1. Detecta labels/objetos
+        labels_resp = rek.detect_labels(
+            Image={"S3Object": {"Bucket": bucket, "Name": key}},
+            MaxLabels=15,
+            MinConfidence=70.0
+        )
+        
+        raw_labels = [lbl["Name"] for lbl in labels_resp.get("Labels", [])]
+        logger.info(f"Labels brutos detectados: {raw_labels}")
+        
+        # Traduz e limpa duplicatas
+        translated_tags = []
+        seen = set()
+        for label in raw_labels:
+            trans = translate_label(label)
+            # Se a tradução contiver "/", divide em múltiplas tags
+            for part in trans.split("/"):
+                part_clean = part.strip().lower()
+                if part_clean and part_clean not in seen:
+                    seen.add(part_clean)
+                    translated_tags.append(part_clean)
+
+        # 2. Detecta texto (opcional, ex: palavras escritas em camisetas ou objetos)
+        try:
+            text_resp = rek.detect_text(
+                Image={"S3Object": {"Bucket": bucket, "Name": key}}
+            )
+            for text_detection in text_resp.get("TextDetections", []):
+                # Pega palavras (WORD) com boa confiança
+                if text_detection["Type"] == "WORD" and text_detection["Confidence"] > 80.0:
+                    text_word = text_detection["DetectedText"].lower().strip()
+                    # Filtra palavras muito curtas ou comuns para evitar lixo
+                    if len(text_word) > 2 and text_word not in seen:
+                        seen.add(text_word)
+                        translated_tags.append(text_word)
+        except Exception as text_err:
+            logger.warning(f"Erro ao detectar texto com Rekognition: {text_err}")
+
+        # Monta descrição amigável
+        if translated_tags:
+            # Capitaliza as tags para a frase de exibição
+            display_tags = [t.capitalize() for t in translated_tags]
+            # Limita a descrição às primeiras 10 tags
+            desc_elements = ", ".join(display_tags[:10])
+            description = f"Elementos identificados: {desc_elements}."
+        else:
+            description = "Nenhum elemento específico identificado na foto."
+
+        return description, translated_tags
+
+    except Exception as e:
+        logger.error(f"Erro ao analisar com Rekognition: {e}", exc_info=True)
+        return "Erro ao analisar imagem com a IA.", []
+
+
+def send_metadata_to_site(s3_key: str, description: str, tags: list) -> bool:
+    """
+    Envia a descrição e as tags extraídas pela IA de volta para o banco de dados do site.
+    """
+    if not HERO_API_URL or not HERO_API_TOKEN:
+        logger.warning("HERO_API_URL ou HERO_API_TOKEN não definidos. Ignorando envio de metadados.")
+        return False
+
+    payload = {
+        "s3_key": s3_key,
+        "ai_description": description,
+        "ai_tags": tags
+    }
+
+    try:
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            HERO_API_URL,
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "X-Hero-Token": HERO_API_TOKEN
+            },
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp_body = resp.read().decode("utf-8")
+            logger.info(f"Metadados enviados com sucesso para o site. Resposta: {resp_body}")
+            return True
+
+    except Exception as e:
+        logger.error(f"Erro ao enviar metadados para o site ({HERO_API_URL}): {e}")
+        return False
+
 
 
 def load_watermark(bucket: str) -> Image.Image | None:
@@ -223,6 +467,18 @@ def lambda_handler(event, context):
             )
 
             logger.info(f"Proxy salvo: s3://{bucket}/{dst_key}")
+
+            # ─── 6. AUTO-TAGGING & DESCRIÇÃO COM IA NATIVA ───────────────────
+            if ENABLE_AI:
+                try:
+                    logger.info(f"Iniciando análise com Amazon Rekognition para: s3://{bucket}/{src_key}")
+                    desc, tags = analyze_image_with_rekognition(bucket, src_key)
+                    logger.info(f"Análise concluída. Descrição: {desc} | Tags: {tags}")
+                    
+                    # Envia metadados de volta para o site (usando a key do proxy para corresponder ao proxy_url no banco)
+                    send_metadata_to_site(dst_key, desc, tags)
+                except Exception as ai_err:
+                    logger.error(f"Erro ao rodar etapa de IA para {src_key}: {ai_err}", exc_info=True)
 
         except Exception as e:
             logger.error(f"Erro ao processar {src_key}: {e}", exc_info=True)

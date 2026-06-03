@@ -245,6 +245,9 @@ class ClientProjectController extends BaseController
         $cleanName = str_replace(' ', '_', $cleanName);
         $filename  = "conectar_ensaio_" . $id . "_" . strtolower($cleanName) . ".bat";
 
+        // Nome da pasta amigavel no S3 (com fallback para o ID se for projeto antigo)
+        $folder = (!empty($project->s3_folder)) ? $project->s3_folder : $id;
+
         // Conteúdo do BAT com CRLF do Windows
         $content  = "@echo off\r\n";
         $content .= ":: ==========================================\r\n";
@@ -259,7 +262,7 @@ class ClientProjectController extends BaseController
         $content .= "echo ========================================================\r\n";
         $content .= "echo  Conectando ao S3 de forma 100% transparente...\r\n";
         $content .= "echo  Ensaio: " . esc($project->name) . " (ID: " . $id . ")\r\n";
-        $content .= "echo  Diretorio S3: originals/" . $id . "\r\n";
+        $content .= "echo  Diretorio S3: originals/" . $folder . "\r\n";
         $content .= "echo ========================================================\r\n";
         $content .= "echo.\r\n\r\n";
         $content .= ":: 1. Verificar se rclone esta no PATH\r\n";
@@ -316,7 +319,7 @@ class ClientProjectController extends BaseController
         $content .= "echo --------------------------------------------------------\r\n";
         $content .= "echo.\r\n\r\n";
         $content .= ":: Monta o S3 usando flags de linha de comando diretas para garantir que a sessao do WinFsp herde as credenciais\r\n";
-        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $id . "/ S: --s3-provider \"AWS\" --s3-access-key-id \"" . $accessKey . "\" --s3-secret-access-key \"" . $secretKey . "\" --s3-region \"" . $region . "\" --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
+        $content .= "%RCLONE_BIN% mount :s3:" . $bucket . "/originals/" . $folder . "/ S: --s3-provider \"AWS\" --s3-access-key-id \"" . $accessKey . "\" --s3-secret-access-key \"" . $secretKey . "\" --s3-region \"" . $region . "\" --s3-no-head --s3-no-head-object --s3-no-check-bucket --vfs-cache-mode full --network-mode=false\r\n\r\n";
         $content .= "if %ERRORLEVEL% neq 0 (\r\n";
         $content .= "    color 0C\r\n";
         $content .= "    echo.\r\n";

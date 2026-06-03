@@ -265,10 +265,29 @@
     <div class="card-body">
         <h4 class="mb-4 brand-font text-white">Galeria de Fotos do Projeto</h4>
         
+        <!-- Barra de busca por IA -->
+        <div class="mb-4">
+            <div class="input-group">
+                <span class="input-group-text bg-black text-gold border-secondary">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="photoSearchInput" class="form-control bg-black text-white border-secondary" placeholder="Buscar por elemento ou tag da IA (ex: piano, cachorro, azul, blusa)..." oninput="filterPhotos()">
+                <button class="btn btn-outline-gold" type="button" onclick="clearSearch()">Limpar</button>
+            </div>
+            <div class="form-text text-muted small mt-1">
+                <i class="fas fa-brain me-1 text-gold"></i> Digite para buscar elementos identificados automaticamente nas fotos. A pesquisa busca no nome do arquivo, na descrição e nas etiquetas geradas pela IA.
+            </div>
+        </div>
+        
         <div class="photo-grid-admin" id="adminPhotoGrid">
             <?php if (!empty($photos)): ?>
                 <?php foreach ($photos as $i => $photo): ?>
-                    <div class="photo-item-admin <?= $photo->status === 'selected' ? 'selected' : '' ?>" id="admin-photo-card-<?= $photo->id ?>" data-id="<?= $photo->id ?>" data-filename="<?= esc($photo->original_filename) ?>">
+                    <div class="photo-item-admin <?= $photo->status === 'selected' ? 'selected' : '' ?>" 
+                         id="admin-photo-card-<?= $photo->id ?>" 
+                         data-id="<?= $photo->id ?>" 
+                         data-filename="<?= esc($photo->original_filename) ?>"
+                         data-ai-description="<?= esc($photo->ai_description ?? '') ?>"
+                         data-ai-tags="<?= esc($photo->ai_tags ?? '') ?>">
                         
                         <!-- Badges de Interação -->
                         <div class="interaction-badges">
@@ -299,6 +318,27 @@
                                 <span class="badge bg-secondary" style="font-size:0.65rem;">#<?= $i + 1 ?></span>
                                 <span class="badge text-uppercase text-gold" style="font-size:0.6rem; background:rgba(197, 160, 89, 0.15);" id="status-badge-<?= $photo->id ?>"><?= esc($photo->status) ?></span>
                             </div>
+                            
+                            <?php if (!empty($photo->ai_description) || !empty($photo->ai_tags)): ?>
+                                <div class="ai-info-box mt-2 pt-2 border-top border-secondary" style="font-size: 0.65rem; color: #aaa;">
+                                    <div class="d-flex align-items-center gap-1 mb-1 text-gold">
+                                        <i class="fas fa-brain" style="font-size:0.6rem;"></i>
+                                        <strong style="font-size:0.6rem;">IA</strong>
+                                    </div>
+                                    <div class="text-truncate" title="<?= esc($photo->ai_description) ?>"><?= esc($photo->ai_description) ?></div>
+                                    <div class="mt-1 text-wrap text-muted" style="font-size: 0.6rem; line-height: 1.2;">
+                                        <?php 
+                                            $tags = explode(',', $photo->ai_tags ?? '');
+                                            foreach ($tags as $tag) {
+                                                $tag = trim($tag);
+                                                if ($tag) {
+                                                    echo '<span class="badge bg-dark text-light border border-secondary me-1 px-1 py-0" style="font-size:0.55rem;">' . esc($tag) . '</span>';
+                                                }
+                                            }
+                                        ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -343,6 +383,55 @@
         }, 2000);
     }
 
+    // Helper para gerar o HTML do box de IA
+    function getAiInfoHtml(photo) {
+        if (!photo.ai_description && !photo.ai_tags) {
+            return '';
+        }
+        const desc = photo.ai_description || '';
+        const tagsStr = photo.ai_tags || '';
+        const tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
+        let tagsHtml = '';
+        tags.forEach(tag => {
+            tagsHtml += `<span class="badge bg-dark text-light border border-secondary me-1 px-1 py-0" style="font-size:0.55rem;">${tag}</span>`;
+        });
+        return `
+            <div class="ai-info-box mt-2 pt-2 border-top border-secondary" style="font-size: 0.65rem; color: #aaa;">
+                <div class="d-flex align-items-center gap-1 mb-1 text-gold">
+                    <i class="fas fa-brain" style="font-size:0.6rem;"></i>
+                    <strong style="font-size:0.6rem;">IA</strong>
+                </div>
+                <div class="text-truncate" title="${desc}">${desc}</div>
+                <div class="mt-1 text-wrap text-muted" style="font-size: 0.6rem; line-height: 1.2;">
+                    ${tagsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Filtragem cliente-side de fotos
+    function filterPhotos() {
+        const query = document.getElementById('photoSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.photo-item-admin');
+        
+        cards.forEach(card => {
+            const filename = (card.dataset.filename || '').toLowerCase();
+            const desc = (card.dataset.aiDescription || '').toLowerCase();
+            const tags = (card.dataset.aiTags || '').toLowerCase();
+            
+            if (!query || filename.includes(query) || desc.includes(query) || tags.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function clearSearch() {
+        document.getElementById('photoSearchInput').value = '';
+        filterPhotos();
+    }
+
     // Polling ativo a cada 3 segundos
     function startAdminPolling() {
         setInterval(() => {
@@ -359,40 +448,42 @@
                     document.getElementById('statSelectedCount').textContent = data.stats.selected;
                     document.getElementById('statLovedCount').textContent = data.stats.loved;
                     document.getElementById('statRatedCount').textContent = data.stats.rated;
-
+ 
                     const grid = document.getElementById('adminPhotoGrid');
                     const noPhotosPlaceholder = document.getElementById('noPhotosPlaceholder');
-
+ 
                     if (data.photos.length > 0 && noPhotosPlaceholder) {
                         noPhotosPlaceholder.remove();
                     }
-
+ 
                     let selectedFilenames = [];
-
+ 
                     // 2. Loop pelas fotos vindas da Sincronização S3
                     data.photos.forEach((photo, index) => {
                         const id = parseInt(photo.id);
-
+ 
                         // Coleta nomes das selecionadas para o filtro do Lightroom
                         if (photo.status === 'selected') {
                             selectedFilenames.push(photo.original_filename);
                         }
-
+ 
                         // Se é uma foto nova
                         if (!localPhotoIds.has(id)) {
                             localPhotoIds.add(id);
-
+ 
                             const card = document.createElement('div');
                             card.className = `photo-item-admin ${photo.status === 'selected' ? 'selected' : ''}`;
                             card.id = `admin-photo-card-${id}`;
                             card.dataset.id = id;
                             card.dataset.filename = photo.original_filename;
-
+                            card.dataset.aiDescription = photo.ai_description || '';
+                            card.dataset.aiTags = photo.ai_tags || '';
+ 
                             let starsHtml = '';
                             for (let s = 1; s <= 5; s++) {
                                 starsHtml += `<i class="fas fa-star" style="opacity: ${s <= (photo.rating ?? 0) ? '1' : '0.2'}"></i>`;
                             }
-
+ 
                             card.innerHTML = `
                                 <div class="interaction-badges">
                                     <div class="badge-love ${photo.is_loved == 1 ? 'active' : ''}">
@@ -414,14 +505,19 @@
                                         <span class="badge bg-secondary" style="font-size:0.65rem;">#${index + 1}</span>
                                         <span class="badge text-uppercase text-gold" style="font-size:0.6rem; background:rgba(197, 160, 89, 0.15);" id="status-badge-${id}">${photo.status}</span>
                                     </div>
+                                    ${getAiInfoHtml(photo)}
                                 </div>
                             `;
-
+ 
                             grid.appendChild(card);
                         } else {
-                            // Se já existe, atualizamos as badges dinamicamente
+                            // Se já existe, atualizamos as badges e metadados dinamicamente
                             const existingCard = document.getElementById(`admin-photo-card-${id}`);
                             if (existingCard) {
+                                // Atualiza atributos de busca
+                                existingCard.dataset.aiDescription = photo.ai_description || '';
+                                existingCard.dataset.aiTags = photo.ai_tags || '';
+ 
                                 // Status
                                 if (photo.status === 'selected') {
                                     existingCard.classList.add('selected');
@@ -430,18 +526,18 @@
                                     existingCard.classList.remove('selected');
                                     existingCard.querySelector('.badge-select').classList.remove('active');
                                 }
-
+ 
                                 const statusBadge = document.getElementById(`status-badge-${id}`);
                                 if (statusBadge) {
                                     statusBadge.textContent = photo.status;
                                 }
-
+ 
                                 // Love (Coração)
                                 const loveBadge = existingCard.querySelector('.badge-love');
                                 if (loveBadge) {
                                     loveBadge.classList.toggle('active', photo.is_loved == 1);
                                 }
-
+ 
                                 // Estrelas
                                 const starsIndicator = existingCard.querySelector('.stars-indicator');
                                 if (starsIndicator) {
@@ -452,21 +548,36 @@
                                     }
                                     starsIndicator.innerHTML = starsHtml;
                                 }
+ 
+                                // Bloco de IA
+                                let aiBox = existingCard.querySelector('.ai-info-box');
+                                if (aiBox) {
+                                    aiBox.remove();
+                                }
+                                if (photo.ai_description || photo.ai_tags) {
+                                    const footer = existingCard.querySelector('.photo-footer-admin');
+                                    if (footer) {
+                                        footer.insertAdjacentHTML('beforeend', getAiInfoHtml(photo));
+                                    }
+                                }
                             }
                         }
                     });
-
+ 
                     // Atualiza a string do Lightroom
                     const filterArea = document.getElementById('lightroomFilter');
                     if (filterArea) {
                         filterArea.value = selectedFilenames.join(', ');
                     }
+ 
+                    // Se uma busca estiver ativa, re-filtra as fotos atualizadas
+                    filterPhotos();
                 }
             })
             .catch(err => console.error('Erro no polling do admin:', err));
         }, 3000);
     }
-
+ 
     // Inicializa a string do Lightroom a partir das fotos selecionadas iniciais
     function initLightroomFilter() {
         let initialSelected = [];
@@ -480,13 +591,13 @@
         const selected = document.querySelectorAll('.photo-item-admin.selected').length;
         const loved = document.querySelectorAll('.badge-love.active').length;
         const rated = document.querySelectorAll('.stars-indicator.active').length;
-
+ 
         document.getElementById('statTotalPhotos').textContent = total;
         document.getElementById('statSelectedCount').textContent = selected;
         document.getElementById('statLovedCount').textContent = loved;
         document.getElementById('statRatedCount').textContent = rated;
     }
-
+ 
     initLightroomFilter();
     startAdminPolling();
 </script>

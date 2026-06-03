@@ -103,7 +103,14 @@ class AwsS3Service
      */
     public function syncProjectPhotos(int $projectId, \App\Models\ProjectPhotoModel $photoModel, int $urlMinutes = 120): array
     {
-        $prefix  = "proxies/{$projectId}/";
+        // Busca a pasta amigavel no S3 (s3_folder) no banco de dados
+        $db = \Config\Database::connect();
+        $project = $db->table('client_projects')->where('id', $projectId)->get()->getRow();
+        
+        // Mantem compatibilidade com projetos antigos: se nao houver s3_folder, usa o ID
+        $folder = (!empty($project->s3_folder)) ? $project->s3_folder : $projectId;
+
+        $prefix  = "proxies/{$folder}/";
         $s3Keys  = $this->listFiles($prefix);
 
         // Fotos já registradas no banco (indexadas por original_filename)

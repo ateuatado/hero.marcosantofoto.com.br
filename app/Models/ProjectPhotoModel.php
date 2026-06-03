@@ -12,7 +12,7 @@ class ProjectPhotoModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['project_id', 'original_filename', 'proxy_url', 'final_url', 'status', 'is_loved', 'rating'];
+    protected $allowedFields    = ['project_id', 'original_filename', 'proxy_url', 'final_url', 'status', 'is_loved', 'rating', 'ai_description', 'ai_tags'];
 
     // Dates
     protected $useTimestamps = true;
@@ -29,5 +29,7 @@ class ProjectPhotoModel extends Model
         'status'            => 'required|in_list[pending,selected,delivered]',
         'is_loved'          => 'permit_empty|in_list[0,1]',
         'rating'            => 'permit_empty|greater_than_equal_to[0]|less_than_equal_to[5]',
+        'ai_description'    => 'permit_empty|string',
+        'ai_tags'           => 'permit_empty|string',
     ];
 }
