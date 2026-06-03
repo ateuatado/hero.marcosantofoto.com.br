@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "==============================================" -ForegroundColor Yellow
-Write-Host "   DEPLOIANDO LAMBDA: hero-process-photo      " -ForegroundColor Yellow
+Write-Host "   DEPLOIANDO LAMBDA: hero-lambda-s3-role     " -ForegroundColor Yellow
 Write-Host "==============================================" -ForegroundColor Yellow
 
 # Garante que estamos na pasta correta
@@ -29,7 +29,7 @@ Compress-Archive -Path $SourceFile -DestinationPath $ZipFile -Force
 Write-Host "[+] Atualizando codigo do Lambda na AWS..." -ForegroundColor Cyan
 try {
     aws lambda update-function-code `
-      --function-name hero-process-photo `
+      --function-name hero-lambda-s3-role `
       --zip-file fileb://$ZipFile `
       --region us-east-2
     
