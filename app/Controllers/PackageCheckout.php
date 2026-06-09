@@ -36,36 +36,37 @@ class PackageCheckout extends BaseController
 
         // ── Cria Preference no MercadoPago ──────────────────────────────────
         try {
-            \MercadoPago\MercadoPagoConfig::setAccessToken(getenv('MERCADOPAGO_ACCESS_TOKEN'));
+            \MercadoPago\MercadoPagoConfig::setAccessToken(env('MERCADOPAGO_ACCESS_TOKEN'));
 
             $client = new \MercadoPago\Client\Preference\PreferenceClient();
 
-            $item             = new \MercadoPago\Resources\Preference\Item();
-            $item->title      = "Ensaio Fotográfico — {$package->name}";
-            $item->quantity   = 1;
-            $item->unit_price = (float) $package->base_price;
-
-            $payer             = new \MercadoPago\Resources\Preference\Payer();
-            $payer->name       = $name;
-            $payer->email      = $email;
-
             $preferenceData = [
-                'items'     => [$item],
-                'payer'     => $payer,
+                'items' => [
+                    [
+                        'title'       => "Ensaio Fotográfico — {$package->name}",
+                        'quantity'    => 1,
+                        'unit_price'  => (float) $package->base_price,
+                        'currency_id' => 'BRL',
+                    ],
+                ],
+                'payer' => [
+                    'name'  => $name,
+                    'email' => $email,
+                ],
                 'back_urls' => [
                     'success' => site_url("ensaio/obrigado?pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
                     'failure' => site_url("ensaio/falha"),
                     'pending' => site_url("ensaio/pendente"),
                 ],
-                'auto_return'        => 'approved',
-                'external_reference' => "ENSAIO_PKG{$packageId}_HERO{$heroId}",
+                'auto_return'          => 'approved',
+                'external_reference'   => "ENSAIO_PKG{$packageId}_HERO{$heroId}",
                 'statement_descriptor' => 'Marco Santo Foto',
             ];
 
             $preference = $client->create($preferenceData);
 
             return $this->response->setJSON([
-                'success'    => true,
+                'success'      => true,
                 'checkout_url' => $preference->init_point,
             ]);
 
