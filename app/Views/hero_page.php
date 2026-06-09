@@ -434,7 +434,6 @@
           <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
           <?php if ($pkg->extra_photo_price > 0): ?><div class="pkg-extra">+ fotos por R$ <?= number_format($pkg->extra_photo_price, 0, ',', '.') ?> cada</div><?php endif; ?>
           <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER ESTE PACOTE</button>
-          <button class="pkg-btn-talk" onclick="openTalk(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $hero['id'] ?>)">Prefiro conversar antes</button>
         </div>
       </div>
       <?php endforeach; ?>
@@ -461,7 +460,6 @@
               <div class="pkg-photos"><?= (int)$pkg->included_photos ?> fotos tratadas</div>
               <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
               <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER</button>
-              <button class="pkg-btn-talk" onclick="openTalk(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $hero['id'] ?>)">Prefiro conversar antes</button>
             </div>
           </div>
           <?php endforeach; ?>
@@ -470,6 +468,20 @@
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
+
+    <!-- Faixa "Ainda tem dúvidas?" — rede de segurança para quem hesitou -->
+    <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:60px;padding-top:48px;text-align:center;">
+      <p style="font-family:'EB Garamond',Georgia,serif;font-style:italic;font-size:clamp(1.1rem,2.5vw,1.4rem);color:rgba(255,255,255,.4);margin-bottom:20px;">
+        Ainda tem d&uacute;vidas antes de escolher?
+      </p>
+      <button onclick="openTalk(0,'Geral',<?= $hero['id'] ?>)"
+              style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:12px 36px;font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .25s;"
+              onmouseover="this.style.borderColor='rgba(197,160,89,.4)';this.style.color='rgba(197,160,89,.8)'"
+              onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.45)'">
+        Conversar antes de comprar
+      </button>
+    </div>
+
   </div>
 </section>
 
