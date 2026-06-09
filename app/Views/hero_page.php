@@ -318,11 +318,8 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     var swiper = new Swiper(".mySwiper", {
-        loop: false,
-        effect: "fade",
-        fadeEffect: {
-            crossFade: true
-        },
+        loop: true,
+        speed: 700,
         navigation: {
             nextEl: ".swiper-button-next",
             prevEl: ".swiper-button-prev",
@@ -331,7 +328,10 @@
             el: ".swiper-pagination",
             clickable: true,
         },
-        keyboard: true,
+        keyboard: {
+            enabled: true,
+        },
+        a11y: true,
     });
 
     // Fluxo Unificado
@@ -453,4 +453,3 @@
     }
 </script>
 <?= $this->endSection() ?>
-```
