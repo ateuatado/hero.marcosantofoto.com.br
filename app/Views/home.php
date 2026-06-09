@@ -16,15 +16,27 @@
             <?php if(!empty($heroes)): ?>
                 <?php foreach($heroes as $hero): ?>
                     <div class="col mb-5">
-                        <div class="card h-100 bg-black border-dark shadow-lg">
-                            <div class="card-body p-4 text-center">
-                                <h3 class="fw-bolder brand-font text-white"><?= esc($hero['name']) ?></h3>
-                                <p class="text-secondary text-uppercase small tracking-wide"><?= esc($hero['sport']) ?></p>
+                        <a href="<?= site_url($hero['slug']) ?>" class="hero-link">
+                            <div class="card h-100 bg-black border-dark shadow-lg overflow-hidden">
+                                <!-- Foto de Capa -->
+                                <div class="hero-card-img-wrapper" style="height: 250px; overflow: hidden; background-color: #0d0d0d; position: relative;">
+                                    <?php if(!empty($hero['cover_image'])): ?>
+                                        <img src="<?= base_url($hero['cover_image']) ?>" class="card-img-top hero-card-img w-100 h-100" style="object-fit: cover; transition: transform 0.5s ease;" alt="<?= esc($hero['name']) ?>">
+                                    <?php else: ?>
+                                        <div class="d-flex align-items-center justify-content-center h-100 text-muted small">
+                                            <i class="fas fa-image fa-2x opacity-25"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="card-body p-4 text-center">
+                                    <h3 class="fw-bolder brand-font text-white"><?= esc($hero['name']) ?></h3>
+                                    <p class="text-secondary text-uppercase small tracking-wide"><?= esc($hero['sport']) ?></p>
+                                </div>
+                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                                    <span class="btn btn-outline-light w-100 text-uppercase">Ver Retratos</span>
+                                </div>
                             </div>
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
-                                <a class="btn btn-outline-light w-100 text-uppercase" href="<?= site_url($hero['slug']) ?>">Ver Retratos</a>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

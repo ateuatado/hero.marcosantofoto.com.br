@@ -439,13 +439,18 @@
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });
-        // Auto-open modal if requested via URL
+        });
+    }
+
+    // Auto-open modal if requested via URL
     if (window.location.search.includes('agenda=1')) {
         setTimeout(function() {
-            document.querySelector('[data-bs-target^="#unifiedModal"]').click();
+            const modalBtn = document.querySelector('[data-bs-target^="#unifiedModal"]');
+            if (modalBtn) {
+                modalBtn.click();
+            }
         }, 1000);
     }
-});
 </script>
 <?= $this->endSection() ?>
 ```
