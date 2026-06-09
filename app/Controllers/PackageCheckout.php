@@ -31,18 +31,28 @@ class PackageCheckout extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Pacote não encontrado.']);
         }
 
-        // Salva intenção no log (reaproveita tabela de intentions se existir, senão só loga)
         log_message('info', "Nova intenção de compra: {$name} <{$email}> ({$phone}) → Pacote #{$packageId} ({$package->name}) | Hero #{$heroId}");
 
-        // ── Cria Preference no MercadoPago ──────────────────────────────────
-        $token = env('MERCADOPAGO_ACCESS_TOKEN');
+        // ── Lê o token — usa getenv() igual ao GaleriaController que já funciona ──
+        $token = getenv('MERCADOPAGO_ACCESS_TOKEN');
+        if (empty($token)) {
+            $token = env('MERCADOPAGO_ACCESS_TOKEN'); // fallback CI4
+        }
 
+        if (empty($token)) {
+            log_message('error', 'MERCADOPAGO_ACCESS_TOKEN nao encontrado no ambiente do servidor');
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Configuração de pagamento ausente. Entre em contato.',
+            ]);
+        }
+
+        // ── Cria Preference no MercadoPago ──────────────────────────────────
         try {
             \MercadoPago\MercadoPagoConfig::setAccessToken($token);
 
             $client = new \MercadoPago\Client\Preference\PreferenceClient();
 
-            // MP exige first_name / last_name separados
             $nameParts = explode(' ', trim($name), 2);
             $firstName = $nameParts[0];
             $lastName  = $nameParts[1] ?? $nameParts[0];
@@ -50,12 +60,23 @@ class PackageCheckout extends BaseController
             $preferenceData = [
                 'items' => [
                     [
-                        'title'       => 'Ensaio Fotografico',
+                        'title'       => 'Ensaio Fotografico - ' . $package->name,
                         'quantity'    => 1,
                         'unit_price'  => (float) $package->base_price,
                         'currency_id' => 'BRL',
                     ],
                 ],
+                'payer' => [
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
+                ],
+                'back_urls' => [
+                    'success' => site_url("ensaio/obrigado?pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
+                    'failure' => site_url("ensaio/falha"),
+                    'pending' => site_url("ensaio/pendente"),
+                ],
+                'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
@@ -70,9 +91,10 @@ class PackageCheckout extends BaseController
             $statusCode  = $apiResponse ? $apiResponse->getStatusCode() : 0;
             $content     = $apiResponse ? $apiResponse->getContent() : [];
             log_message('error', 'Erro MP API ' . $statusCode . ': ' . json_encode($content));
-            // Extrai mensagem legível da causa
             $cause   = $content['cause'][0] ?? null;
-            $details = $cause ? ($cause['description'] ?? $cause['code'] ?? '') : ($content['message'] ?? json_encode($content));
+            $details = $cause
+                ? ($cause['description'] ?? $cause['code'] ?? json_encode($cause))
+                : ($content['message'] ?? json_encode($content));
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Erro MP ' . $statusCode . ': ' . $details,
@@ -82,7 +104,7 @@ class PackageCheckout extends BaseController
             log_message('error', 'Erro MP Geral: ' . $e->getMessage());
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Erro: ' . $e->getMessage(),
+                'message' => 'Erro de conexão: ' . $e->getMessage(),
             ]);
         }
     }
@@ -109,7 +131,6 @@ class PackageCheckout extends BaseController
 
         log_message('info', "Intenção 'Falar Antes': {$name} <{$email}> ({$phone}) → Pacote #{$packageId} ({$packageName}) | Hero #{$heroId}");
 
-        // Salva como intenção se o model existir
         try {
             $intentModel = new \App\Models\IntentionModel();
             $intentModel->insert([
@@ -131,14 +152,11 @@ class PackageCheckout extends BaseController
         ]);
     }
 
-    /**
-     * Página de sucesso após pagamento aprovado.
-     */
     public function thanks()
     {
         $pacote = urldecode($this->request->getGet('pacote') ?? '');
         $nome   = urldecode($this->request->getGet('nome') ?? '');
-        return view('package_thanks', ['pacote' => $pacote, 'nome' => $nome]);
+        return view('package_thanks', ['pacote' => $pacote, 'nome' => $nome, 'status' => 'success']);
     }
 
     public function failure()
