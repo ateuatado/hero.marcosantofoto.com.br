@@ -223,7 +223,7 @@
 </div>
 <?php endif; ?>
 
-<?php if(isset($cta) && trim($cta['title'] ?? '') !== ''): ?>
+<?php if(isset($cta) && (trim($cta['title'] ?? '') !== '' || trim($cta['description'] ?? '') !== '' || trim($cta['button_text'] ?? '') !== '')): ?>
 <section class="cta-section">
     <div class="container pb-5">
         <div class="cta-card mx-auto">

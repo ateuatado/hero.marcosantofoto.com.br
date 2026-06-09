@@ -8,13 +8,13 @@ class Home extends BaseController
 {
     public function index()
     {
-        // Redirecionamento inteligente pós-login
+        // Redireciona cliente logado para a galeria
         if (auth()->loggedIn()) {
             $user = auth()->user();
-            if ($user->inGroup('admin', 'superadmin', 'developer')) {
-                return redirect()->to('/admin');
+            if ($user->inGroup('client')) {
+                return redirect()->to('/client/galeria');
             }
-            return redirect()->to('/client/galeria');
+            // Admin e superadmin veem a página pública normalmente
         }
 
         $heroModel = new Hero();
