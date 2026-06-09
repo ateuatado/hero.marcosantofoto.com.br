@@ -66,7 +66,6 @@ class PackageCheckout extends BaseController
                     'failure' => site_url("ensaio/falha"),
                     'pending' => site_url("ensaio/pendente"),
                 ],
-                'auto_return'        => 'approved',
                 'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
