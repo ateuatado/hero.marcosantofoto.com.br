@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Hero;
 use App\Models\Photo;
 use App\Models\Cta;
+use App\Models\CtaBlock;
 
 class HeroPage extends BaseController
 {
@@ -16,7 +17,8 @@ class HeroPage extends BaseController
         if (!$hero) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
 
         $photoModel = new Photo();
-        $ctaModel = new Cta();
+        $ctaModel   = new Cta();
+        $blockModel = new CtaBlock();
 
         $data['hero'] = $hero;
 
@@ -37,8 +39,12 @@ class HeroPage extends BaseController
             $allPhotos = array_merge($coverFirst, $rest);
         }
 
+        $cta    = $ctaModel->where('hero_id', $hero['id'])->first();
+        $blocks = $cta ? $blockModel->blocksForCta((int)$cta['id']) : [];
+
         $data['photos'] = $allPhotos;
-        $data['cta'] = $ctaModel->where('hero_id', $hero['id'])->first();
+        $data['cta']    = $cta;
+        $data['blocks'] = $blocks;
         
         $data['title'] = $hero['name'] . ' | ' . $hero['sport'] . ' | Marco Santo';
 
