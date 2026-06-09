@@ -42,18 +42,24 @@ class PackageCheckout extends BaseController
 
             $client = new \MercadoPago\Client\Preference\PreferenceClient();
 
+            // MP exige first_name / last_name separados
+            $nameParts = explode(' ', trim($name), 2);
+            $firstName = $nameParts[0];
+            $lastName  = $nameParts[1] ?? $nameParts[0];
+
             $preferenceData = [
                 'items' => [
                     [
-                        'title'       => "Ensaio Fotografico - {$package->name}",
+                        'title'       => 'Ensaio Fotografico - ' . $package->name,
                         'quantity'    => 1,
                         'unit_price'  => (float) $package->base_price,
                         'currency_id' => 'BRL',
                     ],
                 ],
                 'payer' => [
-                    'name'  => $name,
-                    'email' => $email,
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
                 ],
                 'back_urls' => [
                     'success' => site_url("ensaio/obrigado?pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
@@ -61,7 +67,7 @@ class PackageCheckout extends BaseController
                     'pending' => site_url("ensaio/pendente"),
                 ],
                 'auto_return'        => 'approved',
-                'external_reference' => "ENSAIO_PKG{$packageId}_HERO{$heroId}",
+                'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
@@ -72,26 +78,23 @@ class PackageCheckout extends BaseController
             ]);
 
         } catch (\MercadoPago\Exceptions\MPApiException $e) {
-            // Captura erros da API do MercadoPago com detalhes completos
             $apiResponse = $e->getApiResponse();
             $statusCode  = $apiResponse ? $apiResponse->getStatusCode() : 0;
             $content     = $apiResponse ? $apiResponse->getContent() : [];
-            log_message('error', 'Erro MP API: status=' . $statusCode . ' body=' . json_encode($content));
+            log_message('error', 'Erro MP API ' . $statusCode . ': ' . json_encode($content));
+            // Extrai mensagem legível da causa
+            $cause   = $content['cause'][0] ?? null;
+            $details = $cause ? ($cause['description'] ?? $cause['code'] ?? '') : ($content['message'] ?? json_encode($content));
             return $this->response->setJSON([
-                'success'     => false,
-                'message'     => '[DEBUG-API] HTTP ' . $statusCode,
-                'api_body'    => $content,
-                'token_ok'    => !empty($token),
-                'token_tip'   => substr((string)$token, 0, 12) . '...',
+                'success' => false,
+                'message' => 'Erro MP ' . $statusCode . ': ' . $details,
             ]);
 
         } catch (\Exception $e) {
             log_message('error', 'Erro MP Geral: ' . $e->getMessage());
             return $this->response->setJSON([
-                'success'   => false,
-                'message'   => '[DEBUG-GERAL] ' . $e->getMessage(),
-                'token_ok'  => !empty($token),
-                'token_tip' => substr((string)$token, 0, 12) . '...',
+                'success' => false,
+                'message' => 'Erro: ' . $e->getMessage(),
             ]);
         }
     }
