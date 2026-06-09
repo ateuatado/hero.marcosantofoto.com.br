@@ -229,6 +229,26 @@
         box-shadow: 0 0 15px rgba(255,255,255,0.1);
         background-color: #000 !important;
     }
+/* ── Package Cards ─────────────────────────────────────────────────── */
+.pkg-card{background:#0a0a0a;border:1px solid rgba(255,255,255,.1);padding:36px 28px 28px;position:relative;transition:border-color .3s,transform .3s;height:100%;display:flex;flex-direction:column;}
+.pkg-card:hover{border-color:rgba(197,160,89,.35);transform:translateY(-4px);}
+.pkg-preferred{border-color:rgba(197,160,89,.55)!important;background:linear-gradient(160deg,#0e0c07 0%,#0a0a0a 100%);}
+.pkg-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#C5A059,#F5E27A);color:#000;font-family:'Inter',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;padding:4px 16px;white-space:nowrap;}
+.pkg-name{font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:16px;margin-top:12px;}
+.pkg-price{font-family:'EB Garamond',Georgia,serif;font-size:clamp(2.4rem,5vw,3.4rem);color:#fff;font-weight:400;line-height:1;margin-bottom:4px;}
+.pkg-currency{font-size:1.1rem;color:#C5A059;vertical-align:super;margin-right:4px;}
+.pkg-photos{font-family:'Inter',sans-serif;font-size:.78rem;color:#C5A059;letter-spacing:.08em;margin-bottom:16px;}
+.pkg-desc{font-family:'EB Garamond',Georgia,serif;font-size:.95rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:16px;flex:1;}
+.pkg-extra{font-family:'Inter',sans-serif;font-size:.7rem;color:rgba(255,255,255,.3);margin-bottom:24px;letter-spacing:.05em;}
+.pkg-btn-buy{width:100%;background:linear-gradient(135deg,#C5A059,#F5E27A,#C5A059);background-size:200%;color:#000;border:none;padding:14px;font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background-position .4s;margin-bottom:10px;}
+.pkg-btn-buy:hover{background-position:100%;}
+.pkg-btn-talk{width:100%;background:transparent;border:none;color:rgba(255,255,255,.3);font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.05em;cursor:pointer;padding:8px;transition:color .2s;text-decoration:underline;text-underline-offset:3px;}
+.pkg-btn-talk:hover{color:rgba(197,160,89,.7);}
+.pkg-card-alt{opacity:.85;}
+.pkg-expand-btn{background:transparent;border:1px solid rgba(197,160,89,.25);color:rgba(255,255,255,.5);font-family:'Inter',sans-serif;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;padding:12px 32px;cursor:pointer;transition:all .2s;}
+.pkg-expand-btn:hover{border-color:rgba(197,160,89,.5);color:#C5A059;}
+.pkg-expand-icon{margin-left:8px;display:inline-block;transition:transform .3s;}
+.pkg-expand-icon.open{transform:rotate(180deg);}
 </style>
 <?= $this->endSection() ?>
 
@@ -377,8 +397,7 @@
     <div class="lp-cta-btn-block">
         <div class="lp-divider mb-5"></div>
         <button type="button" class="btn-hero-premium"
-                data-bs-toggle="modal" data-bs-target="#unifiedModal"
-                onclick="loadSlotsInModal(<?= $hero['id'] ?>)">
+                onclick="document.getElementById('packages').scrollIntoView({behavior:'smooth'})">
             <?= esc($c['text'] ?? 'Quero meu ensaio') ?>
             <span class="btn-shine"></span>
         </button>
@@ -394,88 +413,129 @@
 <?php endforeach; ?>
 <?php endif; ?>
 
-<!-- Modal Unificado (Intenção + Agenda) -->
-<div class="modal fade" id="unifiedModal" tabindex="-1" aria-labelledby="unifiedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark border-secondary glass-modal">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title brand-font text-uppercase" id="unifiedModalLabel">Manifestar Intenção</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="unifiedForm">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="hero_id" value="<?= esc($hero['id']) ?>">
-                    
-                    <div id="step-personal">
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label small text-secondary">SEU NOME</label>
-                                <input type="text" name="name" class="form-control bg-black text-white border-secondary rounded-0 p-3" placeholder="Nome Completo" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small text-secondary">EMAIL</label>
-                                <input type="email" name="email" class="form-control bg-black text-white border-secondary rounded-0 p-3" placeholder="seu@email.com" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small text-secondary">WHATSAPP / CELULAR</label>
-                                <input type="tel" name="phone" class="form-control bg-black text-white border-secondary rounded-0 p-3" placeholder="(00) 00000-0000" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label small text-secondary">ENDEREÇO</label>
-                                <input type="text" name="address" class="form-control bg-black text-white border-secondary rounded-0 p-3" placeholder="Cidade / Estado" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label small text-secondary">IDADE</label>
-                                <input type="number" name="age" class="form-control bg-black text-white border-secondary rounded-0 p-3" placeholder="00" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small text-secondary">TIPO DE ENSAIO</label>
-                            <select name="shoot_type" class="form-select bg-black text-white border-secondary rounded-0 p-3" required>
-                                <option value="" disabled selected>Selecione...</option>
-                                <option value="esporte">Esporte</option>
-                                <option value="performance">Performance</option>
-                                <option value="gestante">Gestante</option>
-                                <option value="lifestyle">Lifestyle</option>
-                                <option value="publicitario">Publicitário</option>
-                                <option value="outro">Outro</option>
-                            </select>
-                        </div>
-
-                        <div class="form-check mb-4 mt-2">
-                            <input class="form-check-input" type="checkbox" id="wantSchedule" onchange="toggleSchedule()">
-                            <label class="form-check-label text-info small" for="wantSchedule">
-                                DESEJO AGENDAR UMA VISITA OU ENSAIO AGORA
-                            </label>
-                        </div>
-
-                        <div id="scheduleSection" style="display: none;" class="mb-4 animate__animated animate__fadeIn">
-                            <label class="form-label small text-secondary mb-3">ESCOLHA UM HORÁRIO DISPONÍVEL</label>
-                            <div id="unifiedSlots" class="row g-2">
-                                <!-- Slots via JS -->
-                            </div>
-                            <input type="hidden" name="availability_id" id="unified_avail_id">
-                        </div>
-
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn-hero-premium">
-                                ENVIAR SOLICITAÇÃO
-                                <span class="btn-shine"></span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+<!-- ══ SEÇÃO DE PACOTES ══════════════════════════════════════════════ -->
+<section id="packages" style="background:#000;padding:80px 0 60px;">
+  <div class="container px-4">
+    <div class="text-center mb-5">
+      <div class="lp-divider mb-4"></div>
+      <p style="font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(197,160,89,.6);margin-bottom:12px;">INVISTA NO SEU REGISTRO</p>
+      <h2 style="font-family:'EB Garamond',Georgia,serif;font-size:clamp(2rem,5vw,3.2rem);color:#fff;font-weight:400;margin:0;">Pacotes de <?= esc($heroCatName) ?></h2>
     </div>
+
+    <?php if (!empty($heroPackages)): ?>
+    <div class="row justify-content-center g-4 mb-5">
+      <?php foreach ($heroPackages as $pkg): ?>
+      <div class="col-md-4">
+        <div class="pkg-card <?= $pkg->is_preferred ? 'pkg-preferred' : '' ?>">
+          <?php if ($pkg->is_preferred): ?><div class="pkg-badge">MAIS ESCOLHIDO</div><?php endif; ?>
+          <div class="pkg-name"><?= esc($pkg->name) ?></div>
+          <div class="pkg-price"><span class="pkg-currency">R$</span><?= number_format($pkg->base_price, 0, ',', '.') ?></div>
+          <div class="pkg-photos"><?= (int)$pkg->included_photos ?> fotos tratadas</div>
+          <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
+          <?php if ($pkg->extra_photo_price > 0): ?><div class="pkg-extra">+ fotos por R$ <?= number_format($pkg->extra_photo_price, 0, ',', '.') ?> cada</div><?php endif; ?>
+          <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER ESTE PACOTE</button>
+          <button class="pkg-btn-talk" onclick="openTalk(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $hero['id'] ?>)">Prefiro conversar antes</button>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <p class="text-center text-muted mb-5" style="font-size:.85rem;">Entre em contato para conhecer nossas opções.</p>
+    <?php endif; ?>
+
+    <?php if (!empty($otherPackages)): ?>
+    <div class="text-center mb-4">
+      <button class="pkg-expand-btn" onclick="toggleOtherPkgs(this)">Ver todos os tipos de ensaio <span class="pkg-expand-icon">↓</span></button>
+    </div>
+    <div id="otherPackages" style="display:none;">
+      <?php foreach ($otherPackages as $catName => $pkgs): ?>
+      <div class="mb-5">
+        <h3 style="font-family:'EB Garamond',Georgia,serif;font-size:1.4rem;color:rgba(197,160,89,.7);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;border-bottom:1px solid rgba(197,160,89,.1);padding-bottom:16px;"><?= esc($catName) ?></h3>
+        <div class="row justify-content-center g-3">
+          <?php foreach ($pkgs as $pkg): ?>
+          <div class="col-md-4">
+            <div class="pkg-card pkg-card-alt <?= $pkg->is_preferred ? 'pkg-preferred' : '' ?>">
+              <?php if ($pkg->is_preferred): ?><div class="pkg-badge">MAIS ESCOLHIDO</div><?php endif; ?>
+              <div class="pkg-name"><?= esc($pkg->name) ?></div>
+              <div class="pkg-price"><span class="pkg-currency">R$</span><?= number_format($pkg->base_price, 0, ',', '.') ?></div>
+              <div class="pkg-photos"><?= (int)$pkg->included_photos ?> fotos tratadas</div>
+              <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
+              <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER</button>
+              <button class="pkg-btn-talk" onclick="openTalk(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $hero['id'] ?>)">Prefiro conversar antes</button>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+  </div>
+</section>
+
+<!-- ══ MODAL CHECKOUT ════════════════════════════════════════════════ -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+    <div class="modal-content" style="background:#0a0a0a;border:1px solid rgba(197,160,89,.25);border-radius:0;">
+      <div class="modal-header" style="border-bottom:1px solid rgba(197,160,89,.12);padding:24px 28px 20px;">
+        <div>
+          <p style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(197,160,89,.6);margin:0 0 4px;">PACOTE SELECIONADO</p>
+          <h5 id="checkoutPkgName" style="font-family:'EB Garamond',Georgia,serif;font-size:1.6rem;color:#fff;margin:0;font-weight:400;"></h5>
+          <p id="checkoutPkgPrice" style="font-family:'Inter',sans-serif;font-size:.9rem;color:#C5A059;margin:4px 0 0;font-weight:500;"></p>
+        </div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:28px;">
+        <form id="checkoutForm">
+          <?= csrf_field() ?>
+          <input type="hidden" id="chk_package_id" name="package_id">
+          <input type="hidden" id="chk_hero_id" name="hero_id">
+          <div class="mb-3">
+            <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">SEU NOME</label>
+            <input type="text" name="name" required placeholder="Nome completo" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+          </div>
+          <div class="mb-3">
+            <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">E-MAIL</label>
+            <input type="email" name="email" required placeholder="seu@email.com" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+          </div>
+          <div class="mb-4">
+            <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">WHATSAPP</label>
+            <input type="tel" name="phone" placeholder="(00) 00000-0000" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+          </div>
+          <button type="submit" id="checkoutSubmitBtn" style="width:100%;background:linear-gradient(135deg,#C5A059,#F5E27A,#C5A059);background-size:200%;color:#000;border:none;padding:16px;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background-position .4s;">PAGAR COM PIX OU CARTÃO →</button>
+          <p id="checkoutError" style="display:none;color:#ff6b6b;font-size:.8rem;text-align:center;margin-top:12px;"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL FALAR ANTES ══════════════════════════════════════════════ -->
+<div class="modal fade" id="talkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+    <div class="modal-content" style="background:#0a0a0a;border:1px solid rgba(255,255,255,.1);border-radius:0;">
+      <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,.08);padding:24px 28px 20px;">
+        <div>
+          <p style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:0 0 4px;">INTERESSE EM</p>
+          <h5 id="talkPkgName" style="font-family:'EB Garamond',Georgia,serif;font-size:1.5rem;color:#fff;margin:0;font-weight:400;"></h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:28px;">
+        <p style="font-family:'EB Garamond',Georgia,serif;font-style:italic;color:rgba(255,255,255,.5);font-size:1rem;margin-bottom:24px;">Deixe seu contato e entro em conversa para responder suas dúvidas antes de qualquer compromisso.</p>
+        <form id="talkForm">
+          <?= csrf_field() ?>
+          <input type="hidden" id="talk_package_id" name="package_id">
+          <input type="hidden" id="talk_hero_id" name="hero_id">
+          <div class="mb-3"><input type="text" name="name" required placeholder="Nome completo" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;"></div>
+          <div class="mb-3"><input type="email" name="email" required placeholder="E-mail" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;"></div>
+          <div class="mb-4"><input type="tel" name="phone" placeholder="WhatsApp / Celular" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;"></div>
+          <button type="submit" style="width:100%;background:transparent;border:1px solid rgba(197,160,89,.5);color:#C5A059;padding:14px;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;">ENVIAR MEU CONTATO</button>
+          <p id="talkSuccess" style="display:none;color:#6bcb77;font-size:.85rem;text-align:center;margin-top:16px;"></p>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <?= $this->endSection() ?>
@@ -485,138 +545,84 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     var swiper = new Swiper(".mySwiper", {
-        loop: true,
-        speed: 700,
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-        pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-        },
-        keyboard: {
-            enabled: true,
-        },
-        a11y: true,
+        loop: true, speed: 700,
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        pagination: { el: ".swiper-pagination", clickable: true },
+        keyboard: { enabled: true }, a11y: true,
     });
 
-    // Fluxo Unificado
-    function loadSlotsInModal(heroId) {
-        const container = document.getElementById('unifiedSlots');
-        container.innerHTML = '<div class="col-12 text-center py-3"><div class="spinner-border spinner-border-sm text-light" role="status"></div></div>';
-        
-        fetch('<?= base_url('schedule/slots/') ?>' + heroId)
-            .then(response => response.json())
-            .then(slots => {
-                if (slots.length === 0) {
-                    container.innerHTML = '<div class="col-12 text-center text-muted small py-2">Nenhum horário disponível no momento.</div>';
-                    return;
-                }
-
-                let html = '';
-                slots.forEach(slot => {
-                    const dateObj = new Date(slot.date + 'T12:00:00');
-                    const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
-                    const typeLabel = slot.type === 'photoshoot' ? 'Ensaio' : (slot.type === 'visit_online' ? 'Online' : 'Estúdio');
-                    
-                    html += `
-                        <div class="col-4 col-md-3">
-                            <div class="p-2 border border-secondary bg-black text-center slot-opt transition-all" 
-                                 onclick="selectUnifiedSlot(this, ${slot.id})"
-                                 style="cursor: pointer; font-size: 0.75rem;">
-                                <div class="fw-bold text-white">${formattedDate}</div>
-                                <div class="text-info">${slot.start_time.substring(0,5)}</div>
-                                <div class="text-secondary" style="font-size: 0.65rem">${typeLabel}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            });
+    function toggleOtherPkgs(btn) {
+        const el = document.getElementById('otherPackages');
+        const icon = btn.querySelector('.pkg-expand-icon');
+        const visible = el.style.display !== 'none';
+        el.style.display = visible ? 'none' : 'block';
+        icon.classList.toggle('open', !visible);
+        if (!visible) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function toggleSchedule() {
-        const section = document.getElementById('scheduleSection');
-        const checkbox = document.getElementById('wantSchedule');
-        section.style.display = checkbox.checked ? 'block' : 'none';
-        if (!checkbox.checked) {
-            document.getElementById('unified_avail_id').value = '';
-            document.querySelectorAll('.slot-opt').forEach(el => el.classList.remove('border-info', 'bg-dark'));
-        }
+    function openCheckout(pkgId, pkgName, price, heroId) {
+        document.getElementById('checkoutPkgName').textContent  = pkgName;
+        document.getElementById('checkoutPkgPrice').textContent = 'R\u00a0' + Number(price).toLocaleString('pt-BR', {minimumFractionDigits:0});
+        document.getElementById('chk_package_id').value = pkgId;
+        document.getElementById('chk_hero_id').value    = heroId;
+        document.getElementById('checkoutError').style.display = 'none';
+        new bootstrap.Modal(document.getElementById('checkoutModal')).show();
     }
 
-    function selectUnifiedSlot(el, id) {
-        document.querySelectorAll('.slot-opt').forEach(opt => {
-            opt.classList.remove('border-info', 'bg-dark');
-            opt.classList.add('border-secondary');
-        });
-        el.classList.remove('border-secondary');
-        el.classList.add('border-info', 'bg-dark');
-        document.getElementById('unified_avail_id').value = id;
+    function openTalk(pkgId, pkgName, heroId) {
+        document.getElementById('talkPkgName').textContent = pkgName;
+        document.getElementById('talk_package_id').value   = pkgId;
+        document.getElementById('talk_hero_id').value      = heroId;
+        document.getElementById('talkSuccess').style.display = 'none';
+        new bootstrap.Modal(document.getElementById('talkModal')).show();
     }
 
-    const unifiedForm = document.getElementById('unifiedForm');
-    if (unifiedForm) {
-        unifiedForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const wantSchedule = document.getElementById('wantSchedule').checked;
-            const availId = document.getElementById('unified_avail_id').value;
-            
-            if (wantSchedule && !availId) {
-                alert('Por favor, selecione um horário ou desmarque a opção de agendamento.');
-                return;
-            }
-
-            const btn = this.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerText = 'ENVIANDO...';
-            btn.disabled = true;
-
-            const formData = new FormData(this);
-
-            fetch('<?= base_url('intentions/store') ?>', {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 201 || data.message) {
-                    this.innerHTML = `
-                        <div class="text-center py-5 animate__animated animate__fadeIn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-check2-circle text-success mb-3" viewBox="0 0 16 16">
-                                <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"/>
-                                <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"/>
-                            </svg>
-                            <h4 class="brand-font text-white mb-2">SOLICITAÇÃO RECEBIDA</h4>
-                            <p class="text-secondary">Em breve entraremos em contato para transcender seus limites.</p>
-                            <button type="button" class="btn btn-link text-white mt-3" data-bs-dismiss="modal">Fechar</button>
-                        </div>
-                    `;
-                } else {
-                    alert('Erro: ' + (data.messages ? Object.values(data.messages).join('\n') : 'Falha no envio.'));
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
-            })
-            .catch(error => {
-                alert('Erro na conexão.');
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('checkoutSubmitBtn');
+        const errEl = document.getElementById('checkoutError');
+        btn.textContent = 'PROCESSANDO...';
+        btn.disabled = true;
+        fetch('<?= base_url('comprar-ensaio') ?>', {
+            method: 'POST', body: new FormData(this), headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.checkout_url) {
+                window.location.href = data.checkout_url;
+            } else {
+                errEl.textContent = data.message || 'Erro ao processar. Tente novamente.';
+                errEl.style.display = 'block';
+                btn.textContent = 'PAGAR COM PIX OU CARTÃO →';
                 btn.disabled = false;
-                btn.innerHTML = originalText;
-            });
-        });
-    }
-
-    // Auto-open modal if requested via URL
-    if (window.location.search.includes('agenda=1')) {
-        setTimeout(function() {
-            const modalBtn = document.querySelector('[data-bs-target^="#unifiedModal"]');
-            if (modalBtn) {
-                modalBtn.click();
             }
-        }, 1000);
-    }
+        })
+        .catch(() => {
+            errEl.textContent = 'Erro de conexão. Tente novamente.';
+            errEl.style.display = 'block';
+            btn.textContent = 'PAGAR COM PIX OU CARTÃO →';
+            btn.disabled = false;
+        });
+    });
+
+    document.getElementById('talkForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        btn.textContent = 'ENVIANDO...';
+        btn.disabled = true;
+        fetch('<?= base_url('quero-falar') ?>', {
+            method: 'POST', body: new FormData(this), headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            const msg = document.getElementById('talkSuccess');
+            msg.textContent = data.message || 'Recebemos seu contato! Em breve entraremos em contato.';
+            msg.style.display = 'block';
+            this.querySelectorAll('input[type="text"],input[type="email"],input[type="tel"]').forEach(i => i.value = '');
+            btn.textContent = 'ENVIAR MEU CONTATO';
+            btn.disabled = false;
+        })
+        .catch(() => { btn.textContent = 'ENVIAR MEU CONTATO'; btn.disabled = false; });
+    });
 </script>
 <?= $this->endSection() ?>

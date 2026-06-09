@@ -75,6 +75,13 @@ $routes->post('schedule/book',         'ScheduleController::book');
 // ─── API Callback do Lambda (Auto-tagging) ──────────────────────────────────
 $routes->post('api/photo/metadata', 'Api\ApiController::saveMetadata');
 
+// ─── Checkout de Pacotes (público) ───────────────────────────────────────────
+$routes->post('comprar-ensaio',  'PackageCheckout::buy');
+$routes->post('quero-falar',     'PackageCheckout::talkFirst');
+$routes->get( 'ensaio/obrigado', 'PackageCheckout::thanks');
+$routes->get( 'ensaio/falha',    'PackageCheckout::failure');
+$routes->get( 'ensaio/pendente', 'PackageCheckout::pending');
+
 
 // ─── Portal do Cliente (autenticado) ──────────────────────────────────────────
 $routes->group('client', ['filter' => 'session'], static function ($routes) {
