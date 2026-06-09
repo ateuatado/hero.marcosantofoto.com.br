@@ -35,15 +35,18 @@ class PackageCheckout extends BaseController
         log_message('info', "Nova intenção de compra: {$name} <{$email}> ({$phone}) → Pacote #{$packageId} ({$package->name}) | Hero #{$heroId}");
 
         // ── Cria Preference no MercadoPago ──────────────────────────────────
+        $token = env('MERCADOPAGO_ACCESS_TOKEN');
+        log_message('info', 'MP Token (primeiros 15): ' . substr((string)$token, 0, 15));
+
         try {
-            \MercadoPago\MercadoPagoConfig::setAccessToken(env('MERCADOPAGO_ACCESS_TOKEN'));
+            \MercadoPago\MercadoPagoConfig::setAccessToken($token);
 
             $client = new \MercadoPago\Client\Preference\PreferenceClient();
 
             $preferenceData = [
                 'items' => [
                     [
-                        'title'       => "Ensaio Fotográfico — {$package->name}",
+                        'title'       => "Ensaio Fotografico - {$package->name}",
                         'quantity'    => 1,
                         'unit_price'  => (float) $package->base_price,
                         'currency_id' => 'BRL',
@@ -58,9 +61,8 @@ class PackageCheckout extends BaseController
                     'failure' => site_url("ensaio/falha"),
                     'pending' => site_url("ensaio/pendente"),
                 ],
-                'auto_return'          => 'approved',
-                'external_reference'   => "ENSAIO_PKG{$packageId}_HERO{$heroId}",
-                'statement_descriptor' => 'Marco Santo Foto',
+                'auto_return'        => 'approved',
+                'external_reference' => "ENSAIO_PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
@@ -72,9 +74,12 @@ class PackageCheckout extends BaseController
 
         } catch (\Exception $e) {
             log_message('error', 'Erro MP PackageCheckout: ' . $e->getMessage());
+            // [DIAGNÓSTICO] Expõe erro real — remover em produção estável
             return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Erro ao conectar com o MercadoPago. Tente novamente.',
+                'success'   => false,
+                'message'   => '[DEBUG] ' . $e->getMessage(),
+                'token_ok'  => !empty($token),
+                'token_tip' => substr((string)$token, 0, 12) . '...',
             ]);
         }
     }
