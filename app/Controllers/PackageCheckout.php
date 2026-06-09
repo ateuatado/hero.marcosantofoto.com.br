@@ -36,7 +36,6 @@ class PackageCheckout extends BaseController
 
         // ── Cria Preference no MercadoPago ──────────────────────────────────
         $token = env('MERCADOPAGO_ACCESS_TOKEN');
-        log_message('info', 'MP Token (primeiros 15): ' . substr((string)$token, 0, 15));
 
         try {
             \MercadoPago\MercadoPagoConfig::setAccessToken($token);
@@ -72,12 +71,25 @@ class PackageCheckout extends BaseController
                 'checkout_url' => $preference->init_point,
             ]);
 
+        } catch (\MercadoPago\Exceptions\MPApiException $e) {
+            // Captura erros da API do MercadoPago com detalhes completos
+            $apiResponse = $e->getApiResponse();
+            $statusCode  = $apiResponse ? $apiResponse->getStatusCode() : 0;
+            $content     = $apiResponse ? $apiResponse->getContent() : [];
+            log_message('error', 'Erro MP API: status=' . $statusCode . ' body=' . json_encode($content));
+            return $this->response->setJSON([
+                'success'     => false,
+                'message'     => '[DEBUG-API] HTTP ' . $statusCode,
+                'api_body'    => $content,
+                'token_ok'    => !empty($token),
+                'token_tip'   => substr((string)$token, 0, 12) . '...',
+            ]);
+
         } catch (\Exception $e) {
-            log_message('error', 'Erro MP PackageCheckout: ' . $e->getMessage());
-            // [DIAGNÓSTICO] Expõe erro real — remover em produção estável
+            log_message('error', 'Erro MP Geral: ' . $e->getMessage());
             return $this->response->setJSON([
                 'success'   => false,
-                'message'   => '[DEBUG] ' . $e->getMessage(),
+                'message'   => '[DEBUG-GERAL] ' . $e->getMessage(),
                 'token_ok'  => !empty($token),
                 'token_tip' => substr((string)$token, 0, 12) . '...',
             ]);
