@@ -4,10 +4,18 @@
 <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
+    /* ── Variáveis da Moldura Dourada ─────────────────────────────────── */
+    :root {
+        --gold-light:  #F5E27A; /* Ouro claro — topo iluminado */
+        --gold-mid:    #C9A84C; /* Ouro médio — laterais */
+        --gold-dark:   #8B6914; /* Ouro escuro — base sombreada */
+        --gold-glow:   rgba(197, 160, 89, 0.35);
+    }
+
     .swiper {
         width: 100%;
         background: #050505;
-        padding-bottom: 50px; /* Garante que a paginação não cole no CTA */
+        padding-bottom: 44px;
     }
     .swiper-slide {
         display: flex;
@@ -15,52 +23,65 @@
         align-items: center;
         justify-content: center;
         position: relative;
-        padding: 90px 6vw 60px 6vw; /* Adiciona respiro nas laterais e limpa o header */
+        padding: 88px 5vw 48px 5vw;
         box-sizing: border-box;
-        background-color: #050505; /* Fundo sólido para evitar sobreposição */
+        background-color: #050505;
     }
+
+    /* ── Moldura Dourada Metálica ──────────────────────────────────────── */
     .swiper-slide img {
         max-width: 100%;
-        max-height: 65vh; 
+        max-height: 72vh;
         width: auto;
         height: auto;
         object-fit: contain;
-        
-        /* Efeito Passe-partout Creme Clássico 3D com cortes em esquadria nas quinas */
+
+        /* Moldura dourada fina com gradiente metálico nas 4 faces */
         border-style: solid;
-        border-width: clamp(15px, 2.5vw, 35px);
-        
-        /* Definir cores ligeiramente diferentes para as 4 bordas força o navegador 
-           a desenhar linhas diagonais perfeitas nas quinas (miter joints)! */
-        border-top-color:    #FFFDF7; /* Creme Iluminado (Topo) */
-        border-right-color:  #E5DBB8; /* Creme Sombreado (Direita) */
-        border-bottom-color: #D1C59A; /* Creme Escuro (Base da moldura) */
-        border-left-color:   #EAE3CA; /* Creme Sutil (Esquerda) */
-        
-        border-radius: 2px;
-        
-        /* Sombra externa cinza projetada (destaca a moldura do fundo escuro) */
-        box-shadow: 0 30px 60px rgba(180, 180, 180, 0.12),
-                    0 5px 15px rgba(255, 255, 255, 0.05),
-                    0 0 0 1px rgba(200, 200, 200, 0.1); /* Delicada linha de luz externa */
+        border-width: clamp(8px, 1.2vw, 16px);
+
+        border-top-color:    var(--gold-light);
+        border-right-color:  var(--gold-dark);
+        border-bottom-color: var(--gold-dark);
+        border-left-color:   var(--gold-light);
+
+        border-radius: 1px;
+
+        /* Brilho externo dourado + sombra profunda */
+        box-shadow:
+            0 0 0 1px var(--gold-mid),               /* linha fina ao redor da moldura */
+            0 0 18px 2px var(--gold-glow),            /* halo dourado suave */
+            0 25px 55px rgba(0, 0, 0, 0.65);          /* sombra de profundidade */
+
+        transition: box-shadow 0.4s ease;
     }
+    .swiper-slide.swiper-slide-active img {
+        box-shadow:
+            0 0 0 1px var(--gold-mid),
+            0 0 28px 6px var(--gold-glow),
+            0 30px 70px rgba(0, 0, 0, 0.75);
+    }
+
+    /* ── Legenda ───────────────────────────────────────────────────────── */
     .photo-caption {
         position: relative;
         width: 100%;
-        padding: 1.5rem 1rem 0 1rem; /* Espaço entre a foto e o texto */
+        padding: 0.9rem 1rem 0 1rem;
         background: transparent;
         color: #fff;
         text-align: center;
         z-index: 10;
     }
     .photo-caption p {
-        font-size: 1.6rem;
-        font-family: 'Cinzel', serif; /* Fonte heroica e imponente */
-        max-width: 900px;
+        font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+        font-family: 'Cinzel', serif;
+        max-width: 780px;
         margin: 0 auto;
-        line-height: 1.5;
-        font-weight: 400;
-        text-shadow: 2px 2px 10px rgba(0,0,0,1);
+        line-height: 1.6;
+        font-weight: 300;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.72);
+        text-shadow: 1px 1px 8px rgba(0,0,0,0.9);
     }
     .cta-section {
         background-color: #050505;
