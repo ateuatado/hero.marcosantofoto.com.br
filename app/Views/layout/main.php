@@ -119,6 +119,15 @@
 
     <?= $this->renderSection('content') ?>
 
+    <footer style="background:#000; border-top: 1px solid rgba(197,160,89,0.15); padding: 2rem 0; text-align: center;">
+        <p style="margin:0; font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:300; letter-spacing:0.15em; color:rgba(255,255,255,0.3); text-transform:uppercase;">
+            &copy; <?= date('Y') ?> Marco Santo &mdash; Todos os direitos reservados
+        </p>
+        <p style="margin:0.4rem 0 0; font-family:'Inter',sans-serif; font-size:0.62rem; font-weight:300; letter-spacing:0.08em; color:rgba(197,160,89,0.4);">
+            Reprodução proibida sem autorização expressa
+        </p>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         window.addEventListener('scroll', function () {
