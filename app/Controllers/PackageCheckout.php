@@ -50,23 +50,12 @@ class PackageCheckout extends BaseController
             $preferenceData = [
                 'items' => [
                     [
-                        'title'       => 'Ensaio Fotografico - ' . $package->name,
+                        'title'       => 'Ensaio Fotografico',
                         'quantity'    => 1,
                         'unit_price'  => (float) $package->base_price,
                         'currency_id' => 'BRL',
                     ],
                 ],
-                'payer' => [
-                    'first_name' => $firstName,
-                    'last_name'  => $lastName,
-                    'email'      => $email,
-                ],
-                'back_urls' => [
-                    'success' => site_url("ensaio/obrigado?pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
-                    'failure' => site_url("ensaio/falha"),
-                    'pending' => site_url("ensaio/pendente"),
-                ],
-                'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
