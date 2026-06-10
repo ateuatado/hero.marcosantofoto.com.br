@@ -25,6 +25,9 @@
                         <a class="nav-link" href="<?= site_url('admin/intentions') ?>">Leads</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold" href="<?= site_url('admin/orders') ?>">Pedidos</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="<?= site_url('admin/bookings') ?>">Agendas</a>
                     </li>
                     <li class="nav-item">

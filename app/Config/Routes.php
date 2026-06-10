@@ -50,6 +50,10 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->resource('packages', ['controller' => 'Admin\PackageController', 'websafe' => 1]);
     $routes->resource('categories', ['controller' => 'Admin\CategoryController', 'websafe' => 1]);
 
+    // Pedidos (orders)
+    $routes->get('orders',        'Admin\OrderController::index');
+    $routes->get('orders/(:num)', 'Admin\OrderController::show/$1');
+
     // Projetos de clientes + sync S3
     $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
     $routes->get( 'client-projects/(:num)/poll',     'Admin\ClientProjectController::pollInteractions/$1');
@@ -78,6 +82,7 @@ $routes->post('api/photo/metadata', 'Api\ApiController::saveMetadata');
 // ─── Checkout de Pacotes (público) ───────────────────────────────────────────
 $routes->post('comprar-ensaio',  'PackageCheckout::buy');
 $routes->post('quero-falar',     'PackageCheckout::talkFirst');
+$routes->post('mp/webhook',      'PackageCheckout::webhook');
 $routes->get( 'ensaio/obrigado', 'PackageCheckout::thanks');
 $routes->get( 'ensaio/falha',    'PackageCheckout::failure');
 $routes->get( 'ensaio/pendente', 'PackageCheckout::pending');

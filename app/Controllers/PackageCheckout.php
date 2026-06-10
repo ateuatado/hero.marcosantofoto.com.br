@@ -4,22 +4,23 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\PackageModel;
+use App\Models\OrderModel;
+use App\Models\Intention;
 
 class PackageCheckout extends BaseController
 {
-    /**
-     * Recebe a escolha do pacote, salva a intenção e redireciona para o MercadoPago.
-     * POST /comprar-ensaio
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /comprar-ensaio
+    // Cria Preference no MercadoPago, salva order local com status=pending
+    // ─────────────────────────────────────────────────────────────────────────
     public function buy()
     {
-        $packageId  = (int) $this->request->getPost('package_id');
-        $heroId     = (int) $this->request->getPost('hero_id');
-        $name       = trim($this->request->getPost('name'));
-        $email      = trim($this->request->getPost('email'));
-        $phone      = trim($this->request->getPost('phone'));
+        $packageId = (int) $this->request->getPost('package_id');
+        $heroId    = (int) $this->request->getPost('hero_id');
+        $name      = trim($this->request->getPost('name'));
+        $email     = trim($this->request->getPost('email'));
+        $phone     = trim($this->request->getPost('phone'));
 
-        // Validação básica
         if (!$packageId || !$name || !$email) {
             return $this->response->setJSON(['success' => false, 'message' => 'Preencha nome e e-mail.']);
         }
@@ -33,39 +34,33 @@ class PackageCheckout extends BaseController
 
         log_message('info', "Nova intenção de compra: {$name} <{$email}> ({$phone}) → Pacote #{$packageId} ({$package->name}) | Hero #{$heroId}");
 
-        // ── Lê o token — usa getenv() igual ao GaleriaController que já funciona ──
-        $token = getenv('MERCADOPAGO_ACCESS_TOKEN');
-        if (empty($token)) {
-            $token = env('MERCADOPAGO_ACCESS_TOKEN'); // fallback CI4
-        }
+        // ── Lê o token MP ────────────────────────────────────────────────────
+        $token = getenv('MERCADOPAGO_ACCESS_TOKEN') ?: env('MERCADOPAGO_ACCESS_TOKEN');
 
         if (empty($token)) {
-            log_message('error', 'MERCADOPAGO_ACCESS_TOKEN nao encontrado no ambiente do servidor');
+            log_message('error', 'MERCADOPAGO_ACCESS_TOKEN ausente no servidor');
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Configuração de pagamento ausente. Entre em contato.',
             ]);
         }
 
-        // ── Cria Preference no MercadoPago ──────────────────────────────────
+        // ── Cria Preference no MercadoPago ───────────────────────────────────
         try {
             \MercadoPago\MercadoPagoConfig::setAccessToken($token);
-
             $client = new \MercadoPago\Client\Preference\PreferenceClient();
 
-            $nameParts = explode(' ', trim($name), 2);
+            $nameParts = explode(' ', $name, 2);
             $firstName = $nameParts[0];
             $lastName  = $nameParts[1] ?? $nameParts[0];
 
             $preferenceData = [
-                'items' => [
-                    [
-                        'title'       => 'Ensaio Fotografico - ' . $package->name,
-                        'quantity'    => 1,
-                        'unit_price'  => (float) $package->base_price,
-                        'currency_id' => 'BRL',
-                    ],
-                ],
+                'items' => [[
+                    'title'       => 'Ensaio Fotografico - ' . $package->name,
+                    'quantity'    => 1,
+                    'unit_price'  => (float) $package->base_price,
+                    'currency_id' => 'BRL',
+                ]],
                 'payer' => [
                     'first_name' => $firstName,
                     'last_name'  => $lastName,
@@ -76,10 +71,24 @@ class PackageCheckout extends BaseController
                     'failure' => site_url("ensaio/falha"),
                     'pending' => site_url("ensaio/pendente"),
                 ],
+                'notification_url' => site_url("mp/webhook"),
                 'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
+
+            // ── Salva order local com status pending ─────────────────────────
+            $orderModel = new OrderModel();
+            $orderModel->insert([
+                'mp_preference_id' => $preference->id,
+                'package_id'       => $packageId,
+                'hero_id'          => $heroId ?: null,
+                'buyer_name'       => $name,
+                'buyer_email'      => $email,
+                'buyer_phone'      => $phone,
+                'amount'           => (float) $package->base_price,
+                'status'           => 'pending',
+            ]);
 
             return $this->response->setJSON([
                 'success'      => true,
@@ -95,24 +104,18 @@ class PackageCheckout extends BaseController
             $details = $cause
                 ? ($cause['description'] ?? $cause['code'] ?? json_encode($cause))
                 : ($content['message'] ?? json_encode($content));
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Erro MP ' . $statusCode . ': ' . $details,
-            ]);
+            return $this->response->setJSON(['success' => false, 'message' => 'Erro MP ' . $statusCode . ': ' . $details]);
 
         } catch (\Exception $e) {
             log_message('error', 'Erro MP Geral: ' . $e->getMessage());
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Erro de conexão: ' . $e->getMessage(),
-            ]);
+            return $this->response->setJSON(['success' => false, 'message' => 'Erro de conexão: ' . $e->getMessage()]);
         }
     }
 
-    /**
-     * Recebe intenção de "falar antes de comprar" sem pagamento online.
-     * POST /quero-falar
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /quero-falar
+    // Salva intenção de contato sem pagamento online
+    // ─────────────────────────────────────────────────────────────────────────
     public function talkFirst()
     {
         $packageId = (int) $this->request->getPost('package_id');
@@ -126,13 +129,13 @@ class PackageCheckout extends BaseController
         }
 
         $packageModel = new PackageModel();
-        $package = $packageModel->find($packageId);
-        $packageName = $package ? $package->name : "Não especificado";
+        $package      = $packageModel->find($packageId);
+        $packageName  = $package ? $package->name : 'Não especificado';
 
         log_message('info', "Intenção 'Falar Antes': {$name} <{$email}> ({$phone}) → Pacote #{$packageId} ({$packageName}) | Hero #{$heroId}");
 
         try {
-            $intentModel = new \App\Models\IntentionModel();
+            $intentModel = new Intention();
             $intentModel->insert([
                 'hero_id'    => $heroId ?: null,
                 'name'       => $name,
@@ -143,7 +146,7 @@ class PackageCheckout extends BaseController
                 'age'        => 0,
             ]);
         } catch (\Exception $e) {
-            log_message('warning', 'IntentionModel não disponível: ' . $e->getMessage());
+            log_message('warning', 'Erro ao salvar intenção: ' . $e->getMessage());
         }
 
         return $this->response->setJSON([
@@ -152,6 +155,123 @@ class PackageCheckout extends BaseController
         ]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /mp/webhook
+    // Recebe notificações assíncronas do MercadoPago
+    // ─────────────────────────────────────────────────────────────────────────
+    public function webhook()
+    {
+        $body = $this->request->getBody();
+        $data = json_decode($body, true) ?? [];
+
+        log_message('info', 'MP Webhook recebido: ' . $body);
+
+        // MP envia tipo "payment" quando um pagamento muda de status
+        $type = $data['type'] ?? $this->request->getGet('type') ?? '';
+        $id   = $data['data']['id'] ?? $this->request->getGet('id') ?? '';
+
+        if ($type !== 'payment' || empty($id)) {
+            return $this->response->setStatusCode(200)->setBody('ok');
+        }
+
+        $token = getenv('MERCADOPAGO_ACCESS_TOKEN') ?: env('MERCADOPAGO_ACCESS_TOKEN');
+        if (empty($token)) {
+            log_message('error', 'Webhook: token MP ausente');
+            return $this->response->setStatusCode(200)->setBody('ok');
+        }
+
+        try {
+            \MercadoPago\MercadoPagoConfig::setAccessToken($token);
+            $paymentClient = new \MercadoPago\Client\Payment\PaymentClient();
+            $payment       = $paymentClient->get((int) $id);
+
+            $mpStatus     = $payment->status;           // approved | pending | cancelled
+            $prefId       = $payment->preference_id;
+            $extRef       = $payment->external_reference;
+
+            // Mapeia status MP → nosso enum
+            $statusMap = [
+                'approved'      => 'approved',
+                'pending'       => 'pending',
+                'in_process'    => 'pending',
+                'rejected'      => 'cancelled',
+                'cancelled'     => 'cancelled',
+                'refunded'      => 'refunded',
+                'charged_back'  => 'refunded',
+            ];
+            $localStatus = $statusMap[$mpStatus] ?? 'pending';
+
+            // Busca e atualiza a order local
+            $orderModel = new OrderModel();
+            $order = $orderModel->findByPreferenceId($prefId);
+
+            if ($order) {
+                $orderModel->update($order->id, [
+                    'mp_payment_id' => (string) $id,
+                    'status'        => $localStatus,
+                    'mp_raw'        => json_encode((array) $payment),
+                ]);
+
+                // Dispara e-mail apenas quando aprovado pela primeira vez
+                if ($localStatus === 'approved' && $order->status !== 'approved') {
+                    $this->sendNotificationEmail($order, (array) $payment);
+                }
+
+            } else {
+                log_message('warning', "Webhook: order não encontrada para preference_id={$prefId} ext_ref={$extRef}");
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Webhook MP erro: ' . $e->getMessage());
+        }
+
+        // MP exige HTTP 200 para considerar o webhook entregue
+        return $this->response->setStatusCode(200)->setBody('ok');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Envia e-mail de notificação ao Marco quando pagamento é aprovado
+    // ─────────────────────────────────────────────────────────────────────────
+    private function sendNotificationEmail(object $order, array $payment): void
+    {
+        try {
+            $adminEmail = env('ADMIN_EMAIL') ?: getenv('ADMIN_EMAIL') ?: 'contato@marcosantofoto.com.br';
+            $amount     = 'R$ ' . number_format((float) $order->amount, 2, ',', '.');
+            $date       = date('d/m/Y H:i');
+            $mpId       = $payment['id'] ?? '—';
+
+            $subject = "💰 Pagamento aprovado — {$order->buyer_name}";
+
+            $message  = "<h2 style='color:#1a1a1a;font-family:sans-serif'>Novo pagamento aprovado ✅</h2>";
+            $message .= "<table style='font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%;max-width:500px'>";
+            $message .= "<tr><td style='padding:8px;color:#666'>Nome</td><td style='padding:8px'><strong>{$order->buyer_name}</strong></td></tr>";
+            $message .= "<tr style='background:#f9f9f9'><td style='padding:8px;color:#666'>E-mail</td><td style='padding:8px'>{$order->buyer_email}</td></tr>";
+            $message .= "<tr><td style='padding:8px;color:#666'>Telefone</td><td style='padding:8px'>{$order->buyer_phone}</td></tr>";
+            $message .= "<tr style='background:#f9f9f9'><td style='padding:8px;color:#666'>Valor</td><td style='padding:8px'><strong style='color:#2e7d32'>{$amount}</strong></td></tr>";
+            $message .= "<tr><td style='padding:8px;color:#666'>ID MercadoPago</td><td style='padding:8px'>{$mpId}</td></tr>";
+            $message .= "<tr style='background:#f9f9f9'><td style='padding:8px;color:#666'>Data</td><td style='padding:8px'>{$date}</td></tr>";
+            $message .= "</table>";
+            $message .= "<p style='font-family:sans-serif;font-size:12px;color:#999;margin-top:24px'>Marco Santo Foto — sistema automático</p>";
+
+            $emailService = \Config\Services::email();
+            $emailService->setTo($adminEmail);
+            $emailService->setSubject($subject);
+            $emailService->setMessage($message);
+
+            if (!$emailService->send()) {
+                log_message('error', 'Falha ao enviar e-mail de notificação: ' . $emailService->printDebugger(['headers']));
+            } else {
+                log_message('info', "E-mail de notificação enviado para {$adminEmail}");
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Erro ao enviar e-mail: ' . $e->getMessage());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Páginas de retorno pós-pagamento
+    // ─────────────────────────────────────────────────────────────────────────
     public function thanks()
     {
         $pacote = urldecode($this->request->getGet('pacote') ?? '');

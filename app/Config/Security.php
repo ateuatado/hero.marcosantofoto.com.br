@@ -83,4 +83,12 @@ class Security extends BaseConfig
      * @see https://codeigniter4.github.io/userguide/libraries/security.html#redirection-on-failure
      */
     public bool $redirect = (ENVIRONMENT === 'production');
+
+    /**
+     * URIs excluídas da proteção CSRF.
+     * O webhook do MercadoPago vem de servidor externo (sem token).
+     */
+    public array $except = [
+        'mp/webhook',
+    ];
 }
