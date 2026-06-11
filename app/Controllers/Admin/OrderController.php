@@ -52,4 +52,51 @@ class OrderController extends BaseController
             'title'   => 'Pedido #' . $id,
         ]);
     }
-}
+
+    // ── Teste de e-mail — acesse /admin/orders/testar-email ──────────────────
+    public function testEmail()
+    {
+        $adminEmail = env('ADMIN_EMAIL') ?: getenv('ADMIN_EMAIL') ?: 'contato@marcosantofoto.com.br';
+
+        $subject = '✅ Teste de e-mail — Marco Santo Foto';
+        $message = "
+            <h2 style='font-family:sans-serif;color:#1a1a1a'>E-mail de teste ✅</h2>
+            <p style='font-family:sans-serif;font-size:14px;color:#333'>
+                Se você recebeu este e-mail, o AWS SES está configurado corretamente.<br><br>
+                <strong>Remetente:</strong> contato@marcosantofoto.com.br<br>
+                <strong>Destinatário:</strong> {$adminEmail}<br>
+                <strong>Horário:</strong> " . date('d/m/Y H:i:s') . "
+            </p>
+            <p style='font-family:sans-serif;font-size:12px;color:#999;margin-top:24px'>
+                Marco Santo Foto — sistema automático
+            </p>
+        ";
+
+        try {
+            $emailService = \Config\Services::email();
+            $emailService->setTo($adminEmail);
+            $emailService->setSubject($subject);
+            $emailService->setMessage($message);
+
+            if ($emailService->send()) {
+                $result = "<div style='font-family:sans-serif;padding:20px;background:#d4edda;color:#155724;border-radius:8px'>
+                    <strong>✅ E-mail enviado com sucesso!</strong><br>
+                    Verifique a caixa de entrada de <strong>{$adminEmail}</strong>
+                </div>";
+            } else {
+                $debug  = $emailService->printDebugger(['headers', 'subject', 'body']);
+                $result = "<div style='font-family:sans-serif;padding:20px;background:#f8d7da;color:#721c24;border-radius:8px'>
+                    <strong>❌ Falha ao enviar e-mail.</strong><br>
+                    <pre style='font-size:12px;margin-top:12px'>" . esc($debug) . "</pre>
+                </div>";
+            }
+        } catch (\Exception $e) {
+            $result = "<div style='font-family:sans-serif;padding:20px;background:#f8d7da;color:#721c24;border-radius:8px'>
+                <strong>❌ Erro:</strong> " . esc($e->getMessage()) . "
+            </div>";
+        }
+
+        return "<!DOCTYPE html><html><body style='padding:30px'>{$result}
+            <p style='margin-top:20px'><a href='/admin/orders' style='font-family:sans-serif'>← Voltar para Pedidos</a></p>
+        </body></html>";
+    }

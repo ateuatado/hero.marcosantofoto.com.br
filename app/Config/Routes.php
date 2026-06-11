@@ -51,8 +51,9 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->resource('categories', ['controller' => 'Admin\CategoryController', 'websafe' => 1]);
 
     // Pedidos (orders)
-    $routes->get('orders',        'Admin\OrderController::index');
-    $routes->get('orders/(:num)', 'Admin\OrderController::show/$1');
+    $routes->get('orders',               'Admin\OrderController::index');
+    $routes->get('orders/testar-email',  'Admin\OrderController::testEmail');
+    $routes->get('orders/(:num)',        'Admin\OrderController::show/$1');
 
     // Projetos de clientes + sync S3
     $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
