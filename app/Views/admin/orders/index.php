@@ -124,9 +124,9 @@
 </div>
 
 <!-- Paginação -->
-<?php if ($pager): ?>
-<div class="mt-3">
-    <?= $pager->links('default', 'bootstrap_pagination') ?>
+<?php if ($pager && $pager->getPageCount() > 1): ?>
+<div class="mt-3 d-flex justify-content-center">
+    <?= $pager->links() ?>
 </div>
 <?php endif; ?>
 
