@@ -100,3 +100,4 @@ class OrderController extends BaseController
             <p style='margin-top:20px'><a href='/admin/orders' style='font-family:sans-serif'>← Voltar para Pedidos</a></p>
         </body></html>";
     }
+}
