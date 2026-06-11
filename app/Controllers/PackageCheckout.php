@@ -243,9 +243,12 @@ class PackageCheckout extends BaseController
                     'mp_raw'        => json_encode((array) $payment),
                 ]);
 
-                // Dispara e-mail apenas quando aprovado pela primeira vez
+                // Dispara ações apenas quando aprovado pela primeira vez
                 if ($localStatus === 'approved' && $order->status !== 'approved') {
                     $this->sendNotificationEmail($order, (array) $payment);
+                    // Gera token de agendamento e envia link ao cliente
+                    $agendaLink = $this->generateAgendaToken($order);
+                    $this->sendClientBookingEmail($order, $agendaLink);
                 }
 
             } else {
@@ -297,6 +300,91 @@ class PackageCheckout extends BaseController
 
         } catch (\Exception $e) {
             log_message('error', 'Erro ao enviar e-mail: ' . $e->getMessage());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Gera token de agendamento na agenda e retorna o link personalizado
+    // ─────────────────────────────────────────────────────────────────────────
+    private function generateAgendaToken(object $order): string
+    {
+        $agendaBase = rtrim(env('AGENDA_BASE_URL', 'https://agenda.marcosantofoto.com.br'), '/');
+        $apiKey     = env('AGENDA_API_KEY', '');
+
+        if (empty($apiKey)) {
+            log_message('warning', '[AgendaToken] AGENDA_API_KEY não configurada. Link de agendamento não gerado.');
+            return $agendaBase;
+        }
+
+        try {
+            $curl = \Config\Services::curlrequest(['verify' => false, 'timeout' => 10]);
+            $res  = $curl->post("{$agendaBase}/api/v1/access-tokens", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json',
+                ],
+                'json' => [
+                    'order_id'       => (string) $order->id,
+                    'customer_email' => $order->buyer_email,
+                    'customer_name'  => $order->buyer_name,
+                    'customer_phone' => $order->buyer_phone ?? '',
+                    'expires_days'   => 90,
+                ],
+            ]);
+
+            $body = json_decode($res->getBody(), true);
+            if (!empty($body['link'])) {
+                log_message('info', "[AgendaToken] Token gerado para order #{$order->id}: {$body['link']}");
+                return $body['link'];
+            }
+
+            log_message('warning', '[AgendaToken] Resposta inesperada: ' . $res->getBody());
+        } catch (\Throwable $e) {
+            log_message('error', '[AgendaToken] Erro ao gerar token: ' . $e->getMessage());
+        }
+
+        return $agendaBase;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Envia e-mail ao cliente com o link personalizado de agendamento
+    // ─────────────────────────────────────────────────────────────────────────
+    private function sendClientBookingEmail(object $order, string $agendaLink): void
+    {
+        try {
+            $subject = '📸 Seu ensaio está confirmado — Agende sua data!';
+
+            $message  = "<div style='font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:40px;'>"
+            . "<p style='font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:#C5A059;margin:0 0 24px'>STUDIO MARCOSANTOFOTO</p>"
+            . "<h2 style='font-family:Georgia,serif;font-size:2rem;font-weight:400;color:#fff;margin:0 0 24px;line-height:1.3'>"
+            . "Olá, {$order->buyer_name}! 🎉</h2>"
+            . "<p style='color:rgba(255,255,255,.7);line-height:1.8;margin:0 0 24px'>"
+            . "Seu pagamento foi confirmado com sucesso. Agora é hora de escolher a data do seu ensaio fotográfico!</p>"
+            . "<div style='border:1px solid rgba(197,160,89,.3);padding:24px;margin:32px 0;text-align:center;'>"
+            . "<p style='font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(197,160,89,.6);margin:0 0 12px'>LINK EXCLUSIVO DE AGENDAMENTO</p>"
+            . "<a href='{$agendaLink}' style='display:inline-block;background:linear-gradient(135deg,#C5A059,#F5E27A);color:#000;text-decoration:none;padding:16px 36px;font-family:sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin:8px 0'>"
+            . "ESCOLHER MINHA DATA →</a>"
+            . "<p style='font-size:.75rem;color:rgba(255,255,255,.3);margin:12px 0 0'>Este link é válido por 90 dias e é pessoal.</p>"
+            . "</div>"
+            . "<p style='color:rgba(255,255,255,.5);font-size:.85rem;line-height:1.8'>"
+            . "Em caso de dúvidas, responda este e-mail ou entre em contato pelo WhatsApp.</p>"
+            . "<hr style='border:none;border-top:1px solid rgba(255,255,255,.08);margin:32px 0'>"
+            . "<p style='font-size:.7rem;color:rgba(255,255,255,.25);text-align:center;letter-spacing:.1em'>STUDIO MARCOSANTOFOTO</p>"
+            . "</div>";
+
+            $emailService = \Config\Services::email();
+            $emailService->setTo($order->buyer_email);
+            $emailService->setSubject($subject);
+            $emailService->setMessage($message);
+
+            if (!$emailService->send()) {
+                log_message('error', '[BookingEmail] Falha: ' . $emailService->printDebugger(['headers']));
+            } else {
+                log_message('info', "[BookingEmail] Email enviado para {$order->buyer_email} com link: {$agendaLink}");
+            }
+        } catch (\Exception $e) {
+            log_message('error', '[BookingEmail] Erro: ' . $e->getMessage());
         }
     }
 
