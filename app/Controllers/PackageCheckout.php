@@ -161,6 +161,32 @@ class PackageCheckout extends BaseController
     // ─────────────────────────────────────────────────────────────────────────
     public function webhook()
     {
+        // ── Valida assinatura do MercadoPago ─────────────────────────────────
+        $secret = env('MP_WEBHOOK_SECRET') ?: getenv('MP_WEBHOOK_SECRET');
+        if (!empty($secret)) {
+            $xSignature = $this->request->getHeaderLine('x-signature');
+            $xRequestId = $this->request->getHeaderLine('x-request-id');
+
+            // Extrai ts e v1 do header x-signature
+            $ts = '';
+            $v1 = '';
+            foreach (explode(',', $xSignature) as $part) {
+                [$key, $val] = array_pad(explode('=', $part, 2), 2, '');
+                if (trim($key) === 'ts') $ts = trim($val);
+                if (trim($key) === 'v1') $v1 = trim($val);
+            }
+
+            // Monta o manifesto e gera o hash
+            $dataId   = $this->request->getGet('data.id') ?? '';
+            $manifest = "id:{$dataId};request-id:{$xRequestId};ts:{$ts}";
+            $expected = hash_hmac('sha256', $manifest, $secret);
+
+            if (!hash_equals($expected, $v1)) {
+                log_message('warning', "Webhook MP: assinatura inválida. manifest={$manifest}");
+                return $this->response->setStatusCode(401)->setBody('unauthorized');
+            }
+        }
+
         $body = $this->request->getBody();
         $data = json_decode($body, true) ?? [];
 
