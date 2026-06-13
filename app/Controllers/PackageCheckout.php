@@ -242,12 +242,25 @@ class PackageCheckout extends BaseController
             $orderModel = new OrderModel();
             $order = $prefId ? $orderModel->findByPreferenceId($prefId) : null;
 
-            // Fallback: busca por external_reference se não achou pelo preference_id
             if (!$order && $extRef) {
                 log_message('info', "Webhook: tentando busca por external_reference={$extRef}");
-                $order = $orderModel->where('mp_preference_id', $extRef)->first();
-                if ($order) {
-                    $order = (object) $order;
+                $row = $orderModel->where('mp_preference_id', $extRef)->first();
+                if ($row) {
+                    $order = (object) $row;
+                }
+            }
+
+            // Fallback: parseia external_reference no formato PKG{n}_HERO{n}
+            if (!$order && preg_match('/^PKG(\d+)_HERO(\d+)$/', $extRef, $m)) {
+                $row = $orderModel
+                    ->where('package_id', (int) $m[1])
+                    ->where('hero_id', (int) $m[2])
+                    ->where('status', 'pending')
+                    ->orderBy('created_at', 'DESC')
+                    ->first();
+                if ($row) {
+                    $order = (object) $row;
+                    log_message('info', "Webhook: order encontrada via ext_ref parsing: #{$order->id}");
                 }
             }
 

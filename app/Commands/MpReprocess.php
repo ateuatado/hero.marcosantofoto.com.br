@@ -93,7 +93,19 @@ class MpReprocess extends BaseCommand
             $order = $prefId ? $orderModel->findByPreferenceId($prefId) : null;
             if (!$order && $extRef) {
                 $row = $orderModel->where('mp_preference_id', $extRef)->first();
-                $order = $row ? (object) $row : null;
+                $order = $row ? (is_array($row) ? (object)$row : $row) : null;
+            }
+
+            // Fallback: parseia PKG{n}_HERO{n} do external_reference
+            if (!$order && preg_match('/^PKG(\d+)_HERO(\d+)$/', $extRef, $m)) {
+                CLI::write("Buscando por package_id={$m[1]} hero_id={$m[2]}...", 'yellow');
+                $row = $orderModel
+                    ->where('package_id', (int) $m[1])
+                    ->where('hero_id',    (int) $m[2])
+                    ->where('status',     'pending')
+                    ->orderBy('created_at', 'DESC')
+                    ->first();
+                $order = $row ? (is_array($row) ? (object)$row : $row) : null;
             }
 
             if (!$order) {
