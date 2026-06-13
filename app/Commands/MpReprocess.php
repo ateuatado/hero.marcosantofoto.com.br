@@ -42,12 +42,13 @@ class MpReprocess extends BaseCommand
             CLI::write(str_pad('ID', 6) . str_pad('Nome', 25) . str_pad('Email', 30) . str_pad('Valor', 10) . 'Preference ID', 'green');
             CLI::write(str_repeat('-', 100));
             foreach ($pending as $o) {
+                $o = is_array($o) ? (object) $o : $o;
                 CLI::write(
-                    str_pad($o['id'], 6) .
-                    str_pad($o['buyer_name'], 25) .
-                    str_pad($o['buyer_email'], 30) .
-                    str_pad('R$ ' . number_format($o['amount'], 2, ',', '.'), 10) .
-                    ($o['mp_preference_id'] ?? '—')
+                    str_pad($o->id, 6) .
+                    str_pad($o->buyer_name, 25) .
+                    str_pad($o->buyer_email, 30) .
+                    str_pad('R$ ' . number_format($o->amount, 2, ',', '.'), 10) .
+                    ($o->mp_preference_id ?? '—')
                 );
             }
             CLI::write('');
