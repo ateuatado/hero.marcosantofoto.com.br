@@ -216,9 +216,15 @@ class PackageCheckout extends BaseController
             $paymentClient = new \MercadoPago\Client\Payment\PaymentClient();
             $payment       = $paymentClient->get((int) $id);
 
-            $mpStatus     = $payment->status;           // approved | pending | cancelled
-            $prefId       = $payment->preference_id;
-            $extRef       = $payment->external_reference;
+            // SDK v3 retorna objeto com propriedades dinâmicas — converte para array para acesso seguro
+            $paymentArr = json_decode(json_encode($payment), true);
+            log_message('debug', 'MP Payment payload: ' . json_encode($paymentArr));
+
+            $mpStatus = $paymentArr['status']             ?? 'pending';
+            $prefId   = $paymentArr['preference_id']      // SDK v2
+                     ?? $paymentArr['preferenceId']       // SDK v3 camelCase
+                     ?? null;
+            $extRef   = $paymentArr['external_reference'] ?? '';
 
             // Mapeia status MP → nosso enum
             $statusMap = [
@@ -234,25 +240,35 @@ class PackageCheckout extends BaseController
 
             // Busca e atualiza a order local
             $orderModel = new OrderModel();
-            $order = $orderModel->findByPreferenceId($prefId);
+            $order = $prefId ? $orderModel->findByPreferenceId($prefId) : null;
+
+            // Fallback: busca por external_reference se não achou pelo preference_id
+            if (!$order && $extRef) {
+                log_message('info', "Webhook: tentando busca por external_reference={$extRef}");
+                $order = $orderModel->where('mp_preference_id', $extRef)->first();
+                if ($order) {
+                    $order = (object) $order;
+                }
+            }
 
             if ($order) {
                 $orderModel->update($order->id, [
                     'mp_payment_id' => (string) $id,
                     'status'        => $localStatus,
-                    'mp_raw'        => json_encode((array) $payment),
+                    'mp_raw'        => json_encode($paymentArr),
                 ]);
 
                 // Dispara ações apenas quando aprovado pela primeira vez
                 if ($localStatus === 'approved' && $order->status !== 'approved') {
-                    $this->sendNotificationEmail($order, (array) $payment);
+                    $this->sendNotificationEmail($order, $paymentArr);
                     // Gera token de agendamento e envia link ao cliente
                     $agendaLink = $this->generateAgendaToken($order);
                     $this->sendClientBookingEmail($order, $agendaLink);
                 }
 
             } else {
-                log_message('warning', "Webhook: order não encontrada para preference_id={$prefId} ext_ref={$extRef}");
+                log_message('warning', "Webhook: order não encontrada. preference_id={$prefId} ext_ref={$extRef}");
+                log_message('warning', 'Webhook payment keys: ' . implode(', ', array_keys($paymentArr ?? [])));
             }
 
         } catch (\Exception $e) {
