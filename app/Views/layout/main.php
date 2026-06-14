@@ -101,7 +101,7 @@
                             </li>
                         <?php else: ?>
                             <li class="nav-item">
-                                <a class="nav-link text-gold fw-bold" href="<?= site_url('client/galeria') ?>"><i class="fas fa-camera me-1"></i> Minhas Galerias</a>
+                                <a class="nav-link text-gold fw-bold" href="<?= site_url('client/meus-ensaios') ?>"><i class="fas fa-camera me-1"></i> Meus Ensaios</a>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">

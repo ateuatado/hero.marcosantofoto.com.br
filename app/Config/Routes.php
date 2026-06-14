@@ -92,6 +92,7 @@ $routes->get( 'ensaio/status/(:num)', 'PackageCheckout::orderStatus/$1');
 
 // ─── Portal do Cliente (autenticado) ──────────────────────────────────────────
 $routes->group('client', ['filter' => 'session'], static function ($routes) {
+    $routes->get( 'meus-ensaios',                   'Client\MeusEnsaiosController::index');
     $routes->get( 'galeria',                       'Client\GaleriaController::index');
     $routes->get( 'galeria/(:num)',                'Client\GaleriaController::view/$1');
     $routes->get( 'galeria/(:num)/poll',           'Client\GaleriaController::pollPhotos/$1');
