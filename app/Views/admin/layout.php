@@ -8,6 +8,7 @@
     <style>
         body { background-color: #121212; color: #f8f9fa; }
     </style>
+    <?= $this->renderSection('styles') ?>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-dark shadow-sm">
