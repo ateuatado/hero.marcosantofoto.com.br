@@ -18,6 +18,7 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->post('heroes/(:num)/photos',              'Admin\HeroController::uploadPhoto/$1');
     $routes->post('heroes/(:num)/photos/order',        'Admin\HeroController::updatePhotoOrder/$1');
     $routes->post('heroes/photos/(:num)/delete',       'Admin\HeroController::deletePhoto/$1');
+    $routes->post('heroes/photos/(:num)/update',       'Admin\HeroController::updatePhoto/$1');
     $routes->post('heroes/(:num)/photos/(:num)/cover', 'Admin\HeroController::setCover/$1/$2');
 
     // Publicação

@@ -158,6 +158,25 @@ class HeroController extends BaseController
         return redirect()->back()->with('message', 'Foto excluída.');
     }
 
+    public function updatePhoto($photoId)
+    {
+        $photoModel = new \App\Models\Photo();
+        $photo = $photoModel->find($photoId);
+        if (!$photo) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Foto não encontrada.']);
+        }
+
+        $caption      = $this->request->getPost('caption') ?? '';
+        $displayOrder = (int) ($this->request->getPost('display_order') ?? 0);
+
+        $photoModel->update($photoId, [
+            'caption'       => $caption,
+            'display_order' => $displayOrder,
+        ]);
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Foto atualizada!']);
+    }
+
     public function setCover($heroId, $photoId)
     {
         $hero = $this->heroModel->find($heroId);

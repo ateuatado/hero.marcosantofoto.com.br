@@ -52,7 +52,7 @@
                 <?php foreach ($photos as $photo): ?>
                 <?php $isCover = ($photo['id'] == ($hero['cover_photo_id'] ?? null)); ?>
                 <div class="col-md-6">
-                    <div class="card h-100 text-white border-secondary <?= $isCover ? 'border-warning' : 'bg-black' ?>">
+                    <div class="card h-100 text-white border-secondary <?= $isCover ? 'border-warning' : 'bg-black' ?>" id="photo-card-<?= $photo['id'] ?>">
                         <?php if ($isCover): ?>
                             <div class="position-absolute top-0 start-0 m-2">
                                 <span class="badge bg-warning text-dark">&#9733; Capa</span>
@@ -62,9 +62,29 @@
                              class="card-img-top"
                              alt="Foto"
                              style="height:200px; object-fit:cover; <?= $isCover ? 'opacity:1' : 'opacity:0.85' ?>">
-                        <div class="card-body pb-1">
-                            <p class="card-text small text-muted mb-2"><?= esc($photo['caption']) ?></p>
-                            <span class="badge bg-secondary">Ordem: <?= $photo['display_order'] ?></span>
+                        <div class="card-body pb-2">
+                            <!-- ── Legenda editável ── -->
+                            <div class="mb-2">
+                                <label class="form-label text-muted small mb-1" style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;">Legenda</label>
+                                <textarea class="form-control form-control-sm bg-black text-white border-secondary photo-caption-input"
+                                          id="caption-<?= $photo['id'] ?>"
+                                          rows="3"
+                                          style="font-size:.8rem;resize:vertical;"><?= esc($photo['caption']) ?></textarea>
+                            </div>
+                            <!-- ── Ordem editável ── -->
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <label class="text-muted small mb-0" style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;">Ordem</label>
+                                <input type="number" class="form-control form-control-sm bg-black text-white border-secondary photo-order-input"
+                                       id="order-<?= $photo['id'] ?>"
+                                       value="<?= $photo['display_order'] ?>"
+                                       style="width:70px;font-size:.8rem;">
+                                <button type="button" class="btn btn-sm btn-outline-success ms-auto"
+                                        onclick="savePhoto(<?= $photo['id'] ?>)" title="Salvar alterações">
+                                    ✓ Salvar
+                                </button>
+                            </div>
+                            <!-- ── Feedback ── -->
+                            <div id="feedback-<?= $photo['id'] ?>" class="small" style="display:none;"></div>
                         </div>
                         <div class="card-footer bg-transparent border-secondary d-flex gap-2">
                             <?php if (!$isCover): ?>
@@ -94,4 +114,49 @@
         </div>
     </div>
 </div>
+
+<!-- ── Script de edição AJAX ── -->
+<script>
+function savePhoto(photoId) {
+    const caption = document.getElementById('caption-' + photoId).value;
+    const order   = document.getElementById('order-' + photoId).value;
+    const fb      = document.getElementById('feedback-' + photoId);
+    const btn     = event.target;
+
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    const formData = new FormData();
+    formData.append('caption', caption);
+    formData.append('display_order', order);
+
+    fetch('<?= site_url("admin/heroes/photos") ?>/' + photoId + '/update', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        fb.style.display = 'block';
+        if (data.success) {
+            fb.className = 'small text-success';
+            fb.textContent = '✓ Salvo!';
+        } else {
+            fb.className = 'small text-danger';
+            fb.textContent = '✗ ' + (data.message || 'Erro');
+        }
+        btn.disabled = false;
+        btn.textContent = '✓ Salvar';
+        setTimeout(() => { fb.style.display = 'none'; }, 2500);
+    })
+    .catch(() => {
+        fb.style.display = 'block';
+        fb.className = 'small text-danger';
+        fb.textContent = '✗ Erro de conexão';
+        btn.disabled = false;
+        btn.textContent = '✓ Salvar';
+        setTimeout(() => { fb.style.display = 'none'; }, 2500);
+    });
+}
+</script>
 <?= $this->endSection() ?>
