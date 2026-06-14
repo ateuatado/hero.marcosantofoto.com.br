@@ -57,6 +57,7 @@
                         <th>Contato</th>
                         <th>Valor</th>
                         <th>Status</th>
+                        <th>Agenda</th>
                         <th>MP ID</th>
                         <th></th>
                     </tr>
@@ -94,6 +95,16 @@
                                 ?>
                                 <span class="badge <?= $badge ?>"><?= $label ?></span>
                             </td>
+                            <td>
+                                <?php if (!empty($o->agenda_link)): ?>
+                                    <a href="<?= esc($o->agenda_link) ?>" target="_blank"
+                                       class="badge bg-info text-dark text-decoration-none">📅 Agendado</a>
+                                <?php elseif ($o->status === 'approved'): ?>
+                                    <span class="badge bg-warning text-dark">⏳ Pendente</span>
+                                <?php else: ?>
+                                    <span class="text-muted">—</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="small text-muted font-monospace">
                                 <?php if ($o->mp_payment_id): ?>
                                     <a href="https://www.mercadopago.com.br/activities/search?search_term=<?= $o->mp_payment_id ?>"
@@ -112,7 +123,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">
+                            <td colspan="9" class="text-center text-muted py-5">
                                 Nenhum pedido registrado ainda.
                             </td>
                         </tr>

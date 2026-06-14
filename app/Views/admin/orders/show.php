@@ -76,6 +76,20 @@
                             <?php endif; ?>
                         </td>
                     </tr>
+                    <tr>
+                        <td class="text-muted">Agendamento</td>
+                        <td>
+                            <?php if (!empty($order->agenda_link)): ?>
+                            <a href="<?= esc($order->agenda_link) ?>" target="_blank" class="text-info">
+                                📅 Abrir link do agendamento
+                            </a>
+                            <?php elseif ($order->status === 'approved'): ?>
+                            <span class="text-warning">⏳ Link ainda não gerado</span>
+                            <?php else: ?>
+                            <span class="text-muted">—</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
