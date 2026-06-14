@@ -84,12 +84,18 @@
         color: rgba(255,255,255,.25); margin: 0;
     }
 
+    /* ── Page Container ── */
+    .home-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: #000;
+    }
+
     /* ── Portfolio Grid ── */
     .portfolio-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 2px;
-        background: #000;
         padding: 0 2px 2px;
     }
     @media (max-width: 575px) {
@@ -190,6 +196,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="home-container">
 
 <!-- ── Hero Section ── -->
 <section class="home-hero">
@@ -244,4 +251,5 @@
     <?php endif; ?>
 </section>
 
+</div><!-- /.home-container -->
 <?= $this->endSection() ?>
