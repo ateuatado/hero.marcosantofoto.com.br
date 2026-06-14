@@ -54,6 +54,20 @@ class PackageCheckout extends BaseController
             $firstName = $nameParts[0];
             $lastName  = $nameParts[1] ?? $nameParts[0];
 
+            // ── Salva order local ANTES de criar preference (para ter o ID) ──
+            $orderModel = new OrderModel();
+            $orderModel->insert([
+                'mp_preference_id' => '', // será atualizado logo abaixo
+                'package_id'       => $packageId,
+                'hero_id'          => $heroId ?: null,
+                'buyer_name'       => $name,
+                'buyer_email'      => $email,
+                'buyer_phone'      => $phone,
+                'amount'           => (float) $package->base_price,
+                'status'           => 'pending',
+            ]);
+            $orderId = $orderModel->getInsertID();
+
             $preferenceData = [
                 'items' => [[
                     'title'       => 'Ensaio Fotografico - ' . $package->name,
@@ -67,28 +81,19 @@ class PackageCheckout extends BaseController
                     'email'      => $email,
                 ],
                 'back_urls' => [
-                    'success' => site_url("ensaio/obrigado?pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
+                    'success' => site_url("ensaio/obrigado?order={$orderId}&pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
                     'failure' => site_url("ensaio/falha"),
-                    'pending' => site_url("ensaio/pendente"),
+                    'pending' => site_url("ensaio/obrigado?order={$orderId}&pacote=" . urlencode($package->name) . "&nome=" . urlencode($name)),
                 ],
-                'notification_url' => site_url("mp/webhook"),
+                'auto_return'        => 'approved',
+                'notification_url'   => site_url("mp/webhook"),
                 'external_reference' => "PKG{$packageId}_HERO{$heroId}",
             ];
 
             $preference = $client->create($preferenceData);
 
-            // ── Salva order local com status pending ─────────────────────────
-            $orderModel = new OrderModel();
-            $orderModel->insert([
-                'mp_preference_id' => $preference->id,
-                'package_id'       => $packageId,
-                'hero_id'          => $heroId ?: null,
-                'buyer_name'       => $name,
-                'buyer_email'      => $email,
-                'buyer_phone'      => $phone,
-                'amount'           => (float) $package->base_price,
-                'status'           => 'pending',
-            ]);
+            // Atualiza a order com o preference_id gerado
+            $orderModel->update($orderId, ['mp_preference_id' => $preference->id]);
 
             return $this->response->setJSON([
                 'success'      => true,
@@ -265,19 +270,22 @@ class PackageCheckout extends BaseController
             }
 
             if ($order) {
-                $orderModel->update($order->id, [
+                $updateData = [
                     'mp_payment_id' => (string) $id,
                     'status'        => $localStatus,
                     'mp_raw'        => json_encode($paymentArr),
-                ]);
+                ];
 
                 // Dispara ações apenas quando aprovado pela primeira vez
                 if ($localStatus === 'approved' && $order->status !== 'approved') {
                     $this->sendNotificationEmail($order, $paymentArr);
                     // Gera token de agendamento e envia link ao cliente
                     $agendaLink = $this->generateAgendaToken($order);
+                    $updateData['agenda_link'] = $agendaLink;
                     $this->sendClientBookingEmail($order, $agendaLink);
                 }
+
+                $orderModel->update($order->id, $updateData);
 
             } else {
                 log_message('warning', "Webhook: order não encontrada. preference_id={$prefId} ext_ref={$extRef}");
@@ -418,22 +426,55 @@ class PackageCheckout extends BaseController
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Páginas de retorno pós-pagamento
+    // Páginas de retorno pós-pagamento (Sala de Espera)
     // ─────────────────────────────────────────────────────────────────────────
     public function thanks()
     {
-        $pacote = urldecode($this->request->getGet('pacote') ?? '');
-        $nome   = urldecode($this->request->getGet('nome') ?? '');
-        return view('package_thanks', ['pacote' => $pacote, 'nome' => $nome, 'status' => 'success']);
+        $orderId = (int) ($this->request->getGet('order') ?? 0);
+        $pacote  = urldecode($this->request->getGet('pacote') ?? '');
+        $nome    = urldecode($this->request->getGet('nome') ?? '');
+        return view('package_thanks', [
+            'orderId' => $orderId,
+            'pacote'  => $pacote,
+            'nome'    => $nome,
+            'status'  => 'success',
+        ]);
     }
 
     public function failure()
     {
-        return view('package_thanks', ['status' => 'falha', 'pacote' => '', 'nome' => '']);
+        return view('package_thanks', ['status' => 'falha', 'pacote' => '', 'nome' => '', 'orderId' => 0]);
     }
 
     public function pending()
     {
-        return view('package_thanks', ['status' => 'pendente', 'pacote' => '', 'nome' => '']);
+        $orderId = (int) ($this->request->getGet('order') ?? 0);
+        $pacote  = urldecode($this->request->getGet('pacote') ?? '');
+        $nome    = urldecode($this->request->getGet('nome') ?? '');
+        return view('package_thanks', [
+            'orderId' => $orderId,
+            'pacote'  => $pacote,
+            'nome'    => $nome,
+            'status'  => 'pendente',
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // AJAX endpoint: frontend polling para saber se o pagamento foi aprovado
+    // GET /ensaio/status/{orderId}
+    // ─────────────────────────────────────────────────────────────────────────
+    public function orderStatus(int $orderId)
+    {
+        $orderModel = new OrderModel();
+        $order = $orderModel->find($orderId);
+
+        if (!$order) {
+            return $this->response->setJSON(['status' => 'not_found']);
+        }
+
+        return $this->response->setJSON([
+            'status'      => $order->status,
+            'agenda_link' => $order->agenda_link ?? null,
+        ]);
     }
 }

@@ -22,6 +22,7 @@ class OrderModel extends Model
         'buyer_phone',
         'amount',
         'status',
+        'agenda_link',
         'mp_raw',
     ];
 

@@ -87,6 +87,7 @@ $routes->post('mp/webhook',      'PackageCheckout::webhook');
 $routes->get( 'ensaio/obrigado', 'PackageCheckout::thanks');
 $routes->get( 'ensaio/falha',    'PackageCheckout::failure');
 $routes->get( 'ensaio/pendente', 'PackageCheckout::pending');
+$routes->get( 'ensaio/status/(:num)', 'PackageCheckout::orderStatus/$1');
 
 
 // ─── Portal do Cliente (autenticado) ──────────────────────────────────────────
