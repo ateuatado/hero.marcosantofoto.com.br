@@ -249,10 +249,14 @@
 .pkg-expand-btn:hover{border-color:rgba(197,160,89,.5);color:#C5A059;}
 .pkg-expand-icon{margin-left:8px;display:inline-block;transition:transform .3s;}
 .pkg-expand-icon.open{transform:rotate(180deg);}
+
+/* ── Page Container ── */
+.hero-page-container { max-width: 1400px; margin: 0 auto; background: #000; }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="hero-page-container">
 <?php if(!empty($photos)): ?>
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
@@ -550,6 +554,7 @@
   </div>
 </div>
 
+</div><!-- /.hero-page-container -->
 <?= $this->endSection() ?>
 
 
