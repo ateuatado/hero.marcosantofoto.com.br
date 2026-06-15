@@ -34,8 +34,19 @@
     font-family: 'EB Garamond', Georgia, serif;
     font-size: 1.5rem; color: rgba(197,160,89,.7);
     text-align: center; letter-spacing: .1em;
-    text-transform: uppercase; margin-bottom: 36px;
-    padding-bottom: 16px;
+    text-transform: uppercase; margin-bottom: 10px;
+    padding-bottom: 0;
+}
+.cat-desc {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(.88rem, 1.8vw, 1.05rem);
+    color: rgba(255,255,255,.3);
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto 36px;
+    line-height: 1.65;
+    padding-bottom: 20px;
     border-bottom: 1px solid rgba(197,160,89,.1);
 }
 
@@ -130,6 +141,9 @@
     <?php foreach ($grouped as $catName => $packages): ?>
     <div class="cat-section">
       <h2 class="cat-title"><?= esc($catName) ?></h2>
+      <?php if (!empty($catDescMap[$catName] ?? '')): ?>
+        <p class="cat-desc"><?= esc($catDescMap[$catName]) ?></p>
+      <?php endif; ?>
 
       <div class="row justify-content-center g-4">
         <?php foreach ($packages as $pkg): ?>

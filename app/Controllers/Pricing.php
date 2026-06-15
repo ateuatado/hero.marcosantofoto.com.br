@@ -18,9 +18,11 @@ class Pricing extends BaseController
         $allPackages = $packageModel->where('is_active', 1)->orderBy('base_price', 'asc')->findAll();
         $categories  = $catModel->where('is_active', 1)->findAll();
 
-        $catMap = [];
+        $catMap     = [];
+        $catDescMap = [];
         foreach ($categories as $cat) {
-            $catMap[$cat->id] = $cat->name;
+            $catMap[$cat->id]          = $cat->name;
+            $catDescMap[$cat->name]    = $cat->description ?? '';
         }
 
         // Carrega serviços de cada pacote e agrupa por categoria
@@ -39,8 +41,9 @@ class Pricing extends BaseController
         }
 
         return view('pricing', [
-            'title'   => 'Investimento | Marco Santo Fotografia',
-            'grouped' => $grouped,
+            'title'      => 'Investimento | Marco Santo Fotografia',
+            'grouped'    => $grouped,
+            'catDescMap' => $catDescMap,
         ]);
     }
 }
