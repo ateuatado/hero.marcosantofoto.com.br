@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <style>
     @page {
-        margin: 45px 60px 50px 60px;
+        margin: 50px 100px 55px 100px;
     }
     body {
-        font-family: 'Helvetica', 'Arial', sans-serif;
+        font-family: 'Inter', 'DejaVu Sans', 'Helvetica', sans-serif;
         font-size: 12pt;
         color: #333;
         line-height: 1.4;
@@ -63,11 +63,12 @@
     }
     .section-title {
         font-size: 13pt;
-        font-weight: 600;
+        font-weight: bold;
         color: #1a1a1a;
         margin-bottom: 4px;
         padding-bottom: 3px;
-        border-bottom: 1px solid #e8e8e8;
+        border-bottom: 1px solid #e0e0e0;
+        letter-spacing: 0.3px;
     }
     .section-content {
         font-size: 10.5pt;

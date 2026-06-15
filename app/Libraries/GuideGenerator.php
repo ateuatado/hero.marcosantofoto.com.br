@@ -79,11 +79,33 @@ class GuideGenerator
 
         // Gera PDF via DOMPDF
         $options = new Options();
-        $options->set('defaultFont', 'Helvetica');
+        $options->set('defaultFont', 'Inter');
         $options->set('isRemoteEnabled', false);
         $options->set('isHtml5ParserEnabled', true);
+        $options->set('isFontSubsettingEnabled', true);
 
         $dompdf = new Dompdf($options);
+
+        // Registra fonte Inter (moderna, a mesma do site)
+        $fontDir = WRITEPATH . 'fonts/';
+        if (file_exists($fontDir . 'Inter-Regular.ttf')) {
+            $fontMetrics = $dompdf->getFontMetrics();
+            $fontMetrics->registerFont(
+                ['family' => 'Inter', 'style' => 'normal', 'weight' => 'normal'],
+                $fontDir . 'Inter-Regular.ttf'
+            );
+            $fontMetrics->registerFont(
+                ['family' => 'Inter', 'style' => 'normal', 'weight' => 'bold'],
+                $fontDir . 'Inter-Bold.ttf'
+            );
+            if (file_exists($fontDir . 'Inter-Italic.ttf')) {
+                $fontMetrics->registerFont(
+                    ['family' => 'Inter', 'style' => 'italic', 'weight' => 'normal'],
+                    $fontDir . 'Inter-Italic.ttf'
+                );
+            }
+        }
+
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
