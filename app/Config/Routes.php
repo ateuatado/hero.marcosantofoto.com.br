@@ -82,6 +82,9 @@ $routes->post('schedule/book',         'ScheduleController::book');
 // ─── API Callback do Lambda (Auto-tagging) ──────────────────────────────────
 $routes->post('api/photo/metadata', 'Api\ApiController::saveMetadata');
 
+// ─── Página de Investimento (pública) ────────────────────────────────────────
+$routes->get('investimento', 'Pricing::index');
+
 // ─── Checkout de Pacotes (público) ───────────────────────────────────────────
 $routes->post('comprar-ensaio',  'PackageCheckout::buy');
 $routes->post('quero-falar',     'PackageCheckout::talkFirst');
