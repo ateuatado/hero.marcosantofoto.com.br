@@ -251,6 +251,38 @@
 .pkg-expand-icon{margin-left:8px;display:inline-block;transition:transform .3s;}
 .pkg-expand-icon.open{transform:rotate(180deg);}
 
+/* ── Service Checklist inside Package Cards ── */
+.pkg-services { margin: 12px 0 20px; padding: 0; list-style: none; flex: 1; }
+.pkg-services li {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 5px 0; font-family: 'Inter', sans-serif;
+    font-size: .72rem; color: rgba(255,255,255,.5);
+    line-height: 1.35; position: relative;
+    border-bottom: 1px solid rgba(255,255,255,.03);
+}
+.pkg-services li:last-child { border-bottom: none; }
+.pkg-services .svc-check {
+    color: #C5A059; font-size: .65rem;
+    flex-shrink: 0; margin-top: 1px;
+}
+.pkg-services .svc-label { flex: 1; }
+.pkg-services li:hover { color: rgba(255,255,255,.8); }
+.pkg-services .svc-tooltip {
+    display: none; position: absolute;
+    bottom: 100%; left: 20px; right: 0;
+    background: #1a1a1a; border: 1px solid rgba(197,160,89,.25);
+    color: rgba(255,255,255,.65); padding: 8px 12px;
+    font-size: .65rem; line-height: 1.45; z-index: 10;
+    pointer-events: none;
+}
+.pkg-services li:hover .svc-tooltip { display: block; }
+.pkg-phase-label {
+    font-size: .55rem; letter-spacing: .12em; text-transform: uppercase;
+    color: rgba(197,160,89,.45); margin-top: 8px; padding-top: 6px;
+    border-top: 1px solid rgba(197,160,89,.08);
+}
+.pkg-phase-label:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
 /* ── Page Container ── */
 .hero-page-container { max-width: 1400px; margin: 0 auto; background: #000; }
 
@@ -482,7 +514,29 @@
           <div class="pkg-name"><?= esc($pkg->name) ?></div>
           <div class="pkg-price"><span class="pkg-currency">R$</span><?= number_format($pkg->base_price, 0, ',', '.') ?></div>
           <div class="pkg-photos"><?= (int)$pkg->included_photos ?> fotos tratadas</div>
-          <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
+
+          <?php if (!empty($pkg->services)): ?>
+          <ul class="pkg-services">
+            <?php
+              $currentPhase = '';
+              $phaseLabels = \App\Models\ServiceModel::PHASE_LABELS;
+            ?>
+            <?php foreach ($pkg->services as $svc): ?>
+              <?php if ($svc->phase !== $currentPhase): ?>
+                <?php $currentPhase = $svc->phase; ?>
+                <li class="pkg-phase-label"><?= esc($phaseLabels[$currentPhase] ?? $currentPhase) ?></li>
+              <?php endif; ?>
+              <li>
+                <span class="svc-check">✓</span>
+                <span class="svc-label"><?= esc($svc->name) ?></span>
+                <?php if (!empty($svc->description)): ?>
+                  <span class="svc-tooltip"><?= esc($svc->description) ?></span>
+                <?php endif; ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+          <?php endif; ?>
+
           <?php if ($pkg->extra_photo_price > 0): ?><div class="pkg-extra">+ fotos por R$ <?= number_format($pkg->extra_photo_price, 0, ',', '.') ?> cada</div><?php endif; ?>
           <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER ESTE PACOTE</button>
         </div>
@@ -509,7 +563,29 @@
               <div class="pkg-name"><?= esc($pkg->name) ?></div>
               <div class="pkg-price"><span class="pkg-currency">R$</span><?= number_format($pkg->base_price, 0, ',', '.') ?></div>
               <div class="pkg-photos"><?= (int)$pkg->included_photos ?> fotos tratadas</div>
-              <?php if (!empty($pkg->description)): ?><div class="pkg-desc"><?= nl2br(esc($pkg->description)) ?></div><?php endif; ?>
+
+              <?php if (!empty($pkg->services)): ?>
+              <ul class="pkg-services">
+                <?php
+                  $currentPhase = '';
+                  $phaseLabels = \App\Models\ServiceModel::PHASE_LABELS;
+                ?>
+                <?php foreach ($pkg->services as $svc): ?>
+                  <?php if ($svc->phase !== $currentPhase): ?>
+                    <?php $currentPhase = $svc->phase; ?>
+                    <li class="pkg-phase-label"><?= esc($phaseLabels[$currentPhase] ?? $currentPhase) ?></li>
+                  <?php endif; ?>
+                  <li>
+                    <span class="svc-check">✓</span>
+                    <span class="svc-label"><?= esc($svc->name) ?></span>
+                    <?php if (!empty($svc->description)): ?>
+                      <span class="svc-tooltip"><?= esc($svc->description) ?></span>
+                    <?php endif; ?>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+              <?php endif; ?>
+
               <button class="pkg-btn-buy" onclick="openCheckout(<?= $pkg->id ?>,'<?= esc($pkg->name) ?>',<?= $pkg->base_price ?>,<?= $hero['id'] ?>)">ESCOLHER</button>
             </div>
           </div>

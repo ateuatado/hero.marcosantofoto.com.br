@@ -59,7 +59,17 @@ class HeroPage extends BaseController
         // Pacotes de outras categorias, agrupados por categoria
         $otherPackages = [];
 
+        // Carrega serviços de cada pacote via pivô
+        $db = \Config\Database::connect();
         foreach ($allPackages as $pkg) {
+            $pkg->services = $db->table('package_services')
+                                ->join('services', 'services.id = package_services.service_id')
+                                ->where('package_services.package_id', $pkg->id)
+                                ->where('services.is_active', 1)
+                                ->orderBy('services.phase', 'asc')
+                                ->orderBy('services.name', 'asc')
+                                ->get()->getResultObject();
+
             if ($heroCatId && $pkg->category_id == $heroCatId) {
                 $heroPackages[] = $pkg;
             } else {
