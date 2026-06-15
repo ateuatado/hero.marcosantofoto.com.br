@@ -47,9 +47,10 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->get( 'bookings',              'Admin\BookingController::index');
     $routes->post('bookings/(:num)/delete', 'Admin\BookingController::delete/$1');
 
-    // Pacotes
+    // Pacotes, Categorias & Serviços
     $routes->resource('packages', ['controller' => 'Admin\PackageController', 'websafe' => 1]);
     $routes->resource('categories', ['controller' => 'Admin\CategoryController', 'websafe' => 1]);
+    $routes->resource('services', ['controller' => 'Admin\ServiceController', 'websafe' => 1]);
 
     // Pedidos (orders)
     $routes->get('orders',               'Admin\OrderController::index');
