@@ -29,6 +29,7 @@ class Hero extends Model
 
     // Validation
     protected $validationRules      = [
+        'id'          => 'permit_empty|is_natural_no_zero',
         'name'        => 'required|max_length[255]',
         'sport'       => 'permit_empty|max_length[255]',
         'category_id' => 'permit_empty|is_natural_no_zero',

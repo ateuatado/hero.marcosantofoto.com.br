@@ -22,6 +22,7 @@ class CategoryModel extends Model
 
     // Validation
     protected $validationRules = [
+        'id'          => 'permit_empty|is_natural_no_zero',
         'name'        => 'required|min_length[3]|max_length[100]',
         'slug'        => 'permit_empty|alpha_dash|max_length[100]|is_unique[categories.slug,id,{id}]',
         'description' => 'permit_empty',
