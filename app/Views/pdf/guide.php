@@ -4,45 +4,45 @@
 <meta charset="UTF-8">
 <style>
     @page {
-        margin: 50px 45px 60px 45px;
+        margin: 40px 40px 50px 40px;
     }
     body {
         font-family: 'Helvetica', 'Arial', sans-serif;
-        font-size: 11pt;
+        font-size: 12pt;
         color: #333;
-        line-height: 1.7;
+        line-height: 1.5;
     }
 
     /* ── Capa ── */
     .cover {
         text-align: center;
-        padding-top: 200px;
+        padding-top: 180px;
     }
     .cover-brand {
-        font-size: 12pt;
+        font-size: 13pt;
         letter-spacing: 6px;
         text-transform: uppercase;
         color: #999;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
     .cover-title {
-        font-size: 28pt;
+        font-size: 30pt;
         font-weight: 300;
         color: #1a1a1a;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         letter-spacing: 1px;
     }
     .cover-subtitle {
         font-size: 13pt;
         color: #888;
         font-style: italic;
-        margin-bottom: 60px;
+        margin-bottom: 50px;
     }
     .cover-client {
-        font-size: 14pt;
-        color: #C5A059;
+        font-size: 16pt;
+        color: #B8963E;
         font-weight: 600;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     .cover-meta {
         font-size: 10pt;
@@ -50,66 +50,85 @@
         letter-spacing: 1px;
     }
     .cover-line {
-        width: 60px;
+        width: 50px;
         height: 2px;
-        background: #C5A059;
-        margin: 30px auto;
+        background: #B8963E;
+        margin: 24px auto;
     }
 
     /* ── Seções ── */
     .section {
         page-break-inside: avoid;
-        margin-bottom: 32px;
+        margin-bottom: 18px;
     }
     .section-title {
-        font-size: 15pt;
+        font-size: 14pt;
         font-weight: 600;
         color: #1a1a1a;
-        margin-bottom: 10px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e8e8e8;
     }
     .section-content {
-        font-size: 10.5pt;
+        font-size: 11pt;
         color: #444;
-        line-height: 1.75;
+        line-height: 1.55;
         white-space: pre-line;
+    }
+
+    /* ── Listas ── */
+    .item-yes {
+        color: #2e7d32;
+        font-weight: bold;
+    }
+    .item-no {
+        color: #c62828;
+        font-weight: bold;
+    }
+    .item-bullet {
+        color: #B8963E;
+        font-weight: bold;
     }
 
     /* ── Divider entre grupos ── */
     .group-header {
-        font-size: 10pt;
+        font-size: 11pt;
         letter-spacing: 3px;
         text-transform: uppercase;
-        color: #C5A059;
-        margin: 40px 0 20px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #C5A059;
+        color: #B8963E;
+        margin: 28px 0 14px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #B8963E;
     }
 
     /* ── Contracapa ── */
     .backcover {
         page-break-before: always;
         text-align: center;
-        padding-top: 240px;
+        padding-top: 220px;
     }
     .backcover-brand {
-        font-size: 18pt;
+        font-size: 20pt;
         font-weight: 300;
         color: #1a1a1a;
         letter-spacing: 2px;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
     .backcover-info {
-        font-size: 10pt;
-        color: #888;
-        line-height: 2;
+        font-size: 11pt;
+        color: #777;
+        line-height: 1.8;
     }
     .backcover-line {
         width: 40px;
         height: 1px;
-        background: #C5A059;
-        margin: 20px auto;
+        background: #B8963E;
+        margin: 16px auto;
+    }
+    .backcover-footer {
+        font-size: 8pt;
+        color: #bbb;
+        margin-top: 20px;
     }
 
     /* ── Footer ── */
@@ -119,8 +138,8 @@
         left: 0;
         right: 0;
         text-align: center;
-        font-size: 8pt;
-        color: #ccc;
+        font-size: 7pt;
+        color: #ddd;
         letter-spacing: 2px;
     }
 </style>
@@ -129,12 +148,12 @@
 
 <div class="page-footer">MARCO SANTO FOTOGRAFIA</div>
 
-<!-- ══ CAPA ══ -->
+<!-- CAPA -->
 <div class="cover">
     <div class="cover-brand">Marco Santo</div>
     <div class="cover-line"></div>
-    <div class="cover-title">Guia Pré-Ensaio</div>
-    <div class="cover-subtitle">Tudo que você precisa saber antes do seu ensaio</div>
+    <div class="cover-title">Guia Pre-Ensaio</div>
+    <div class="cover-subtitle">Tudo que voce precisa saber antes do seu ensaio</div>
     <div class="cover-line"></div>
     <div class="cover-client"><?= esc($clientName) ?></div>
     <?php if (!empty($shootType)): ?>
@@ -143,7 +162,7 @@
     <div class="cover-meta" style="margin-top:4px;"><?= esc($shootDate) ?></div>
 </div>
 
-<!-- ══ CONTEÚDO ══ -->
+<!-- CONTEUDO -->
 <div style="page-break-before:always;"></div>
 
 <?php
@@ -155,30 +174,30 @@
         if ($isNiche && $s->category_id !== $lastCatId) {
             $lastCatId = $s->category_id;
     ?>
-        <div class="group-header">Orientações Específicas</div>
+        <div class="group-header">Orientacoes Especificas</div>
     <?php } ?>
 
     <div class="section">
         <div class="section-title"><?= esc($s->title) ?></div>
-        <div class="section-content"><?= nl2br(esc($s->content)) ?></div>
+        <div class="section-content"><?= $formatContent($s->content) ?></div>
     </div>
 <?php endforeach; ?>
 
-<!-- ══ CONTRACAPA ══ -->
+<!-- CONTRACAPA -->
 <div class="backcover">
     <div class="backcover-brand">Marco Santo</div>
     <div class="backcover-line"></div>
     <div class="backcover-info">
-        Estúdio na Lapa — um bairro encantador que parou no tempo<br>
-        Estacionamento disponível na rua<br>
-        Wi-Fi no estúdio<br>
+        Estudio na Lapa - um bairro encantador que parou no tempo<br>
+        Estacionamento disponivel na rua<br>
+        Wi-Fi no estudio<br>
         <br>
-        Dúvidas? Chama no WhatsApp<br>
+        Duvidas? Chama no WhatsApp
     </div>
     <div class="backcover-line"></div>
-    <div class="backcover-info" style="font-size:8pt;color:#bbb;margin-top:20px;">
+    <div class="backcover-footer">
         Este guia foi preparado especialmente para <?= esc($clientName) ?><br>
-        © <?= date('Y') ?> Marco Santo Fotografia — Todos os direitos reservados
+        Marco Santo Fotografia - Todos os direitos reservados
     </div>
 </div>
 

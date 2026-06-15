@@ -11,12 +11,6 @@ class GuideGenerator
 {
     /**
      * Gera o PDF do guia pré-ensaio personalizado.
-     *
-     * @param string      $clientName  Nome do cliente
-     * @param string      $clientEmail Email do cliente
-     * @param int|null    $categoryId  ID da categoria/nicho (null = universal only)
-     * @param string      $shootDate   Data do ensaio formatada
-     * @return string     Conteúdo binário do PDF
      */
     public function generate(string $clientName, string $clientEmail, ?int $categoryId = null, string $shootDate = ''): string
     {
@@ -35,13 +29,47 @@ class GuideGenerator
             $shootDate = date('d/m/Y');
         }
 
+        // Função para formatar conteúdo: substitui emojis por chars compatíveis com DOMPDF
+        $formatContent = function (string $text): string {
+            // Sanitiza
+            $text = esc($text);
+
+            // Substitui emojis por marcadores HTML estilizados
+            $text = str_replace(
+                ['✅', '&#10004;'],
+                ['<span class="item-yes">+</span>'],
+                $text
+            );
+            $text = str_replace(
+                ['❌', '&#10060;'],
+                ['<span class="item-no">-</span>'],
+                $text
+            );
+            $text = str_replace(
+                ['•', '&#8226;'],
+                ['<span class="item-bullet">&bull;</span>'],
+                $text
+            );
+
+            // Remove qualquer emoji remanescente (4-byte UTF-8)
+            $text = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $text);
+            $text = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $text);
+            $text = preg_replace('/[\x{FE00}-\x{FE0F}]/u', '', $text);
+
+            // Converte quebras de linha em <br>
+            $text = nl2br($text);
+
+            return $text;
+        };
+
         // Renderiza o HTML do template
         $html = view('pdf/guide', [
-            'clientName' => $clientName,
-            'clientEmail'=> $clientEmail,
-            'shootType'  => $shootType,
-            'shootDate'  => $shootDate,
-            'sections'   => $sections,
+            'clientName'    => $clientName,
+            'clientEmail'   => $clientEmail,
+            'shootType'     => $shootType,
+            'shootDate'     => $shootDate,
+            'sections'      => $sections,
+            'formatContent' => $formatContent,
         ]);
 
         // Gera PDF via DOMPDF
@@ -51,7 +79,7 @@ class GuideGenerator
         $options->set('isHtml5ParserEnabled', true);
 
         $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
+        $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
