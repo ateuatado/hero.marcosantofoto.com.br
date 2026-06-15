@@ -65,6 +65,8 @@ class PackageCheckout extends BaseController
                 'buyer_phone'      => $phone,
                 'amount'           => (float) $package->base_price,
                 'status'           => 'pending',
+                'accepted_terms_at'      => $this->request->getPost('accept_terms') ? date('Y-m-d H:i:s') : null,
+                'image_usage_authorized' => $this->request->getPost('image_usage') ? 1 : 0,
             ]);
             $orderId = $orderModel->getInsertID();
 

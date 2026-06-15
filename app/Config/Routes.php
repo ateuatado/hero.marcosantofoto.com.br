@@ -56,6 +56,8 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->get('orders',               'Admin\OrderController::index');
     $routes->get('orders/testar-email',  'Admin\OrderController::testEmail');
     $routes->get('orders/(:num)',        'Admin\OrderController::show/$1');
+    $routes->post('orders/(:num)/contract', 'Admin\OrderController::updateContract/$1');
+    $routes->get('orders/(:num)/contract',  'Admin\OrderController::generateContract/$1');
 
     // Projetos de clientes + sync S3
     $routes->get( 'client-projects/(:num)/photos',   'Admin\ClientProjectController::photos/$1');
@@ -75,6 +77,15 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->get( 'guide-sections/(:num)/edit',  'Admin\GuideSectionController::edit/$1');
     $routes->post('guide-sections/(:num)/update','Admin\GuideSectionController::update/$1');
     $routes->post('guide-sections/(:num)/delete','Admin\GuideSectionController::delete/$1');
+
+    // Contrato
+    $routes->get( 'contract-sections',              'Admin\ContractSectionController::index');
+    $routes->get( 'contract-sections/create',       'Admin\ContractSectionController::create');
+    $routes->post('contract-sections/store',        'Admin\ContractSectionController::store');
+    $routes->get( 'contract-sections/preview',      'Admin\ContractSectionController::preview');
+    $routes->get( 'contract-sections/(:num)/edit',  'Admin\ContractSectionController::edit/$1');
+    $routes->post('contract-sections/(:num)/update','Admin\ContractSectionController::update/$1');
+    $routes->post('contract-sections/(:num)/delete','Admin\ContractSectionController::delete/$1');
 });
 
 // ─── Agenda Proxy (resolve CORS/SSL server-side) ──────────────────────────────
@@ -116,6 +127,7 @@ $routes->group('client', ['filter' => 'session'], static function ($routes) {
     $routes->post('galeria/(:num)/photo/(:num)/rate',   'Client\GaleriaController::ratePhoto/$1/$2');
     $routes->get( 'galeria/(:num)/checkout',       'Client\GaleriaController::checkout/$1');
     $routes->get( 'guia-pre-ensaio/(:num)',         'Client\MeusEnsaiosController::downloadGuide/$1');
+    $routes->get( 'contrato/(:num)',                'Client\MeusEnsaiosController::downloadContract/$1');
 });
 
 // ─── Landing page de copy — /{slug}/agendar ───────────────────────────────────

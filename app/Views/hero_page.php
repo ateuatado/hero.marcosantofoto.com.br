@@ -641,6 +641,24 @@
             <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">WHATSAPP</label>
             <input type="tel" name="phone" placeholder="(00) 00000-0000" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
           </div>
+
+          <!-- Termos do contrato -->
+          <div style="margin-bottom:16px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;">
+              <input type="checkbox" name="accept_terms" id="chk_accept_terms" required style="margin-top:3px;accent-color:#C5A059;min-width:16px;">
+              Li e aceito os <a href="#" onclick="event.preventDefault();document.getElementById('termsBox').style.display=document.getElementById('termsBox').style.display==='none'?'block':'none'" style="color:#C5A059;text-decoration:underline;">termos do contrato</a> de prestação de serviços fotográficos.
+            </label>
+            <div id="termsBox" style="display:none;max-height:150px;overflow-y:auto;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);padding:14px;margin-top:8px;font-family:'Inter',sans-serif;font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.6;">
+              Ao contratar este serviço, você concorda com as condições de prestação de serviços fotográficos, incluindo: prazo de entrega de até 15 dias úteis; direitos autorais das imagens pertencem ao fotógrafo (Lei 9.610/98); licença de uso pessoal e profissional concedida ao contratante; arquivos RAW não fazem parte da entrega; política de cancelamento com reembolso integral se comunicado com mais de 7 dias de antecedência, retenção de 50% se menos de 7 dias; não comparecimento sem aviso de 24h configura no-show sem direito a reembolso; dados tratados conforme LGPD (Lei 13.709/18); foro da Comarca de São Paulo/SP.
+            </div>
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;">
+              <input type="checkbox" name="image_usage" id="chk_image_usage" style="margin-top:3px;accent-color:#C5A059;min-width:16px;">
+              Autorizo o uso das minhas imagens para portfólio e divulgação do fotógrafo.
+            </label>
+          </div>
+
           <button type="submit" id="checkoutSubmitBtn" style="width:100%;background:linear-gradient(135deg,#C5A059,#F5E27A,#C5A059);background-size:200%;color:#000;border:none;padding:16px;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background-position .4s;">PAGAR COM PIX OU CARTÃO →</button>
           <p id="checkoutError" style="display:none;color:#ff6b6b;font-size:.8rem;text-align:center;margin-top:12px;"></p>
         </form>

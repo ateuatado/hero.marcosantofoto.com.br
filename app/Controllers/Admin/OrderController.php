@@ -100,4 +100,47 @@ class OrderController extends BaseController
             <p style='margin-top:20px'><a href='/admin/orders' style='font-family:sans-serif'>← Voltar para Pedidos</a></p>
         </body></html>";
     }
+
+    /**
+     * Salva dados contratuais do cliente (CPF, endereço, etc.)
+     */
+    public function updateContract($id)
+    {
+        $orderModel = new OrderModel();
+        $order = $orderModel->find($id);
+        if (!$order) return redirect()->to('/admin/orders');
+
+        $data = [
+            'cpf'            => trim($this->request->getPost('cpf')),
+            'marital_status' => trim($this->request->getPost('marital_status')),
+            'address'        => trim($this->request->getPost('address')),
+            'city'           => trim($this->request->getPost('city')),
+            'state'          => trim($this->request->getPost('state')),
+            'zip_code'       => trim($this->request->getPost('zip_code')),
+        ];
+
+        $orderModel->update($id, $data);
+        return redirect()->to('/admin/orders/' . $id)->with('message', 'Dados contratuais salvos.');
+    }
+
+    /**
+     * Gera e faz download do contrato em PDF.
+     */
+    public function generateContract($id)
+    {
+        $orderModel = new OrderModel();
+        $order = $orderModel->find($id);
+        if (!$order) return redirect()->to('/admin/orders');
+
+        $generator = new \App\Libraries\ContractGenerator();
+        $pdf = $generator->generate($order);
+
+        $filename = 'Contrato-' . str_pad($id, 6, '0', STR_PAD_LEFT) . '.pdf';
+
+        return $this->response
+                     ->setHeader('Content-Type', 'application/pdf')
+                     ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                     ->setBody($pdf);
+    }
 }
+

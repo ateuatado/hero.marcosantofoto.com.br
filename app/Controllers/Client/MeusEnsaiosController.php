@@ -90,4 +90,30 @@ class MeusEnsaiosController extends BaseController
                      ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
                      ->setBody($pdf);
     }
+
+    /**
+     * Gera e faz download do contrato personalizado.
+     */
+    public function downloadContract($orderId)
+    {
+        $user  = auth()->user();
+        $email = $user->email;
+
+        $orderModel = new OrderModel();
+        $order = $orderModel->find($orderId);
+
+        if (!$order || $order->buyer_email !== $email) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $generator = new \App\Libraries\ContractGenerator();
+        $pdf = $generator->generate($order);
+
+        $filename = 'Contrato-' . str_pad($orderId, 6, '0', STR_PAD_LEFT) . '.pdf';
+
+        return $this->response
+                     ->setHeader('Content-Type', 'application/pdf')
+                     ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                     ->setBody($pdf);
+    }
 }

@@ -24,6 +24,15 @@ class OrderModel extends Model
         'status',
         'agenda_link',
         'mp_raw',
+        // Dados contratuais
+        'cpf',
+        'marital_status',
+        'address',
+        'city',
+        'state',
+        'zip_code',
+        'image_usage_authorized',
+        'accepted_terms_at',
     ];
 
     protected $validationRules = [

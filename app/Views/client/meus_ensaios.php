@@ -232,6 +232,9 @@
                         <a href="<?= site_url('client/guia-pre-ensaio/' . $order->id) ?>" class="btn-ensaio" target="_blank">
                             📄 GUIA PRÉ-ENSAIO
                         </a>
+                        <a href="<?= site_url('client/contrato/' . $order->id) ?>" class="btn-ensaio" target="_blank">
+                            📋 MEU CONTRATO
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>

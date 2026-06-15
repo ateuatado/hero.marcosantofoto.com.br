@@ -90,7 +90,86 @@
                             <?php endif; ?>
                         </td>
                     </tr>
+                    <?php if (!empty($order->accepted_terms_at)): ?>
+                    <tr>
+                        <td class="text-muted">Termos aceitos</td>
+                        <td class="small text-success">✅ <?= date('d/m/Y H:i', strtotime($order->accepted_terms_at)) ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if ($order->image_usage_authorized !== null): ?>
+                    <tr>
+                        <td class="text-muted">Uso de imagem</td>
+                        <td>
+                            <?= $order->image_usage_authorized ? '<span class="text-success">✅ Autorizado</span>' : '<span class="text-danger">❌ Não autorizado</span>' ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═════════ DADOS CONTRATUAIS ═════════ -->
+    <div class="col-12">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                <span class="text-warning text-uppercase small fw-bold">📋 Dados do Contrato</span>
+                <a href="<?= site_url('admin/orders/' . $order->id . '/contract') ?>" target="_blank" class="btn btn-outline-light btn-sm" style="font-size:.72rem;letter-spacing:.08em;">
+                    📄 Gerar Contrato PDF
+                </a>
+            </div>
+            <div class="card-body">
+                <?php if (session()->has('message')): ?>
+                    <div class="alert alert-success alert-dismissible fade show" style="font-size:.85rem;" role="alert">
+                        <?= session('message') ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <form action="<?= site_url('admin/orders/' . $order->id . '/contract') ?>" method="post">
+                    <?= csrf_field() ?>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">CPF</label>
+                            <input type="text" name="cpf" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->cpf ?? '') ?>" placeholder="000.000.000-00"
+                                   maxlength="14">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Estado Civil</label>
+                            <select name="marital_status" class="form-select bg-black text-white border-secondary">
+                                <option value="">Selecione...</option>
+                                <?php foreach (['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável'] as $ms): ?>
+                                    <option value="<?= $ms ?>" <?= ($order->marital_status ?? '') === $ms ? 'selected' : '' ?>><?= $ms ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Endereço</label>
+                            <input type="text" name="address" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->address ?? '') ?>" placeholder="Rua, número, complemento">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">Cidade</label>
+                            <input type="text" name="city" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->city ?? '') ?>" placeholder="São Paulo">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small">UF</label>
+                            <input type="text" name="state" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->state ?? '') ?>" placeholder="SP" maxlength="2"
+                                   style="text-transform:uppercase;">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">CEP</label>
+                            <input type="text" name="zip_code" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->zip_code ?? '') ?>" placeholder="00000-000" maxlength="10">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-terroso btn-sm w-100">💾 Salvar Dados</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
