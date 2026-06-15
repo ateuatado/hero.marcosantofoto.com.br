@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <style>
     @page {
-        margin: 40px 40px 50px 40px;
+        margin: 45px 60px 50px 60px;
     }
     body {
         font-family: 'Helvetica', 'Arial', sans-serif;
         font-size: 12pt;
         color: #333;
-        line-height: 1.5;
+        line-height: 1.4;
     }
 
     /* ── Capa ── */
@@ -59,21 +59,20 @@
     /* ── Seções ── */
     .section {
         page-break-inside: avoid;
-        margin-bottom: 18px;
+        margin-bottom: 12px;
     }
     .section-title {
-        font-size: 14pt;
+        font-size: 13pt;
         font-weight: 600;
         color: #1a1a1a;
-        margin-bottom: 6px;
-        padding-bottom: 4px;
+        margin-bottom: 4px;
+        padding-bottom: 3px;
         border-bottom: 1px solid #e8e8e8;
     }
     .section-content {
-        font-size: 11pt;
+        font-size: 10.5pt;
         color: #444;
-        line-height: 1.55;
-        white-space: pre-line;
+        line-height: 1.4;
     }
 
     /* ── Listas ── */

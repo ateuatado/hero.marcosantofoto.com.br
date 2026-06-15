@@ -56,6 +56,11 @@ class GuideGenerator
             $text = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $text);
             $text = preg_replace('/[\x{FE00}-\x{FE0F}]/u', '', $text);
 
+            // Colapsa múltiplas linhas em branco em uma só
+            $text = preg_replace('/\n{3,}/', "\n\n", $text);
+            // Converte \n\n em um espaço pequeno (não dois <br>)
+            $text = str_replace("\n\n", "\n", $text);
+
             // Converte quebras de linha em <br>
             $text = nl2br($text);
 
