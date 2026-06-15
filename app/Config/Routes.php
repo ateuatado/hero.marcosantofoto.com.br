@@ -66,6 +66,15 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
 
     // Hero CRUD (resource por último para não sobrescrever rotas acima)
     $routes->resource('heroes', ['controller' => 'Admin\HeroController', 'websafe' => 1]);
+
+    // Guia Pré-Ensaio
+    $routes->get( 'guide-sections',              'Admin\GuideSectionController::index');
+    $routes->get( 'guide-sections/create',       'Admin\GuideSectionController::create');
+    $routes->post('guide-sections/store',        'Admin\GuideSectionController::store');
+    $routes->get( 'guide-sections/preview',      'Admin\GuideSectionController::preview');
+    $routes->get( 'guide-sections/(:num)/edit',  'Admin\GuideSectionController::edit/$1');
+    $routes->post('guide-sections/(:num)/update','Admin\GuideSectionController::update/$1');
+    $routes->post('guide-sections/(:num)/delete','Admin\GuideSectionController::delete/$1');
 });
 
 // ─── Agenda Proxy (resolve CORS/SSL server-side) ──────────────────────────────
@@ -106,6 +115,7 @@ $routes->group('client', ['filter' => 'session'], static function ($routes) {
     $routes->post('galeria/(:num)/photo/(:num)/love',   'Client\GaleriaController::togglePhotoLove/$1/$2');
     $routes->post('galeria/(:num)/photo/(:num)/rate',   'Client\GaleriaController::ratePhoto/$1/$2');
     $routes->get( 'galeria/(:num)/checkout',       'Client\GaleriaController::checkout/$1');
+    $routes->get( 'guia-pre-ensaio/(:num)',         'Client\MeusEnsaiosController::downloadGuide/$1');
 });
 
 // ─── Landing page de copy — /{slug}/agendar ───────────────────────────────────

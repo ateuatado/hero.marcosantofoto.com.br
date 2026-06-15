@@ -227,6 +227,12 @@
                             ENSAIO CONFIRMADO
                         </span>
                     <?php endif; ?>
+
+                    <?php if ($order->status === 'approved'): ?>
+                        <a href="<?= site_url('client/guia-pre-ensaio/' . $order->id) ?>" class="btn-ensaio" target="_blank">
+                            📄 GUIA PRÉ-ENSAIO
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>

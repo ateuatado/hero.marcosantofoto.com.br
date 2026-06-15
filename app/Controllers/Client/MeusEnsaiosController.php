@@ -48,4 +48,46 @@ class MeusEnsaiosController extends BaseController
             'projects' => $projects,
         ]);
     }
+
+    /**
+     * Gera e faz download do Guia Pré-Ensaio personalizado.
+     */
+    public function downloadGuide($orderId)
+    {
+        $user  = auth()->user();
+        $email = $user->email;
+
+        $orderModel = new OrderModel();
+        $order = $orderModel->find($orderId);
+
+        if (!$order || $order->buyer_email !== $email) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        // Descobre a categoria do pacote
+        $categoryId = null;
+        if ($order->package_id) {
+            $pkg = (new PackageModel())->find($order->package_id);
+            $categoryId = $pkg ? ($pkg->category_id ?? null) : null;
+        }
+
+        $shootDate = $order->created_at
+            ? date('d/m/Y', strtotime($order->created_at))
+            : date('d/m/Y');
+
+        $generator = new \App\Libraries\GuideGenerator();
+        $pdf = $generator->generate(
+            $order->buyer_name,
+            $order->buyer_email,
+            $categoryId,
+            $shootDate
+        );
+
+        $filename = 'Guia-Pre-Ensaio-' . url_title($order->buyer_name, '-', true) . '.pdf';
+
+        return $this->response
+                     ->setHeader('Content-Type', 'application/pdf')
+                     ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                     ->setBody($pdf);
+    }
 }
