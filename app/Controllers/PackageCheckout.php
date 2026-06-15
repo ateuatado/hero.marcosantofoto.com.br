@@ -154,6 +154,38 @@ class PackageCheckout extends BaseController
             log_message('warning', 'Erro ao salvar intenção: ' . $e->getMessage());
         }
 
+        // ── Envia e-mail de notificação ao admin ──
+        try {
+            $adminEmail = env('ADMIN_EMAIL') ?: getenv('ADMIN_EMAIL') ?: 'contato@marcosantofoto.com.br';
+            $date = date('d/m/Y H:i');
+
+            $subject = "💬 Novo lead — {$name} quer conversar";
+
+            $message  = "<h2 style='color:#1a1a1a;font-family:sans-serif'>Novo interesse em conversar 💬</h2>";
+            $message .= "<table style='font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%;max-width:500px'>";
+            $message .= "<tr><td style='padding:8px;color:#666'>Nome</td><td style='padding:8px'><strong>{$name}</strong></td></tr>";
+            $message .= "<tr style='background:#f9f9f9'><td style='padding:8px;color:#666'>E-mail</td><td style='padding:8px'>{$email}</td></tr>";
+            $message .= "<tr><td style='padding:8px;color:#666'>Telefone</td><td style='padding:8px'>" . ($phone ?: '—') . "</td></tr>";
+            $message .= "<tr style='background:#f9f9f9'><td style='padding:8px;color:#666'>Pacote de interesse</td><td style='padding:8px'><strong>{$packageName}</strong></td></tr>";
+            $message .= "<tr><td style='padding:8px;color:#666'>Data</td><td style='padding:8px'>{$date}</td></tr>";
+            $message .= "</table>";
+            $message .= "<p style='font-family:sans-serif;font-size:13px;color:#333;margin-top:20px'>⚡ <strong>Ação:</strong> Entre em contato pelo WhatsApp o mais rápido possível.</p>";
+            $message .= "<p style='font-family:sans-serif;font-size:12px;color:#999;margin-top:24px'>Marco Santo Foto — sistema automático</p>";
+
+            $emailService = \Config\Services::email();
+            $emailService->setTo($adminEmail);
+            $emailService->setSubject($subject);
+            $emailService->setMessage($message);
+
+            if (!$emailService->send()) {
+                log_message('error', 'Falha ao enviar e-mail de lead: ' . $emailService->printDebugger(['headers']));
+            } else {
+                log_message('info', "E-mail de lead enviado para {$adminEmail}");
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Erro ao enviar e-mail de lead: ' . $e->getMessage());
+        }
+
         return $this->response->setJSON([
             'success' => true,
             'message' => 'Recebemos seu interesse! Entraremos em contato em breve.',
