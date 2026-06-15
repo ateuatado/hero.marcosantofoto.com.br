@@ -73,6 +73,7 @@
         width: auto;
         height: auto;
         object-fit: contain;
+        cursor: pointer;
 
         /* Moldura dourada fina com gradiente metálico nas 4 faces */
         border-style: solid;
@@ -252,6 +253,51 @@
 
 /* ── Page Container ── */
 .hero-page-container { max-width: 1400px; margin: 0 auto; background: #000; }
+
+/* ── Lightbox Fullscreen ── */
+.lightbox-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.96);
+    display: none; align-items: center; justify-content: center;
+    cursor: zoom-out;
+    animation: lbFadeIn .3s ease;
+}
+.lightbox-overlay.active { display: flex; }
+@keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-overlay img {
+    max-width: 95vw; max-height: 92vh;
+    width: auto; height: auto;
+    object-fit: contain;
+    border: none; box-shadow: none;
+    cursor: default;
+    animation: lbZoomIn .3s ease;
+}
+@keyframes lbZoomIn { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.lightbox-close {
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none;
+    color: rgba(255,255,255,.5); font-size: 2rem;
+    cursor: pointer; transition: color .2s;
+    z-index: 10;
+}
+.lightbox-close:hover { color: #fff; }
+.lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: none; border: none;
+    color: rgba(255,255,255,.35); font-size: 2.5rem;
+    cursor: pointer; transition: color .2s;
+    padding: 20px; z-index: 10;
+}
+.lightbox-nav:hover { color: rgba(255,255,255,.8); }
+.lightbox-nav.prev { left: 8px; }
+.lightbox-nav.next { right: 8px; }
+.lightbox-counter {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: .7rem; letter-spacing: .15em;
+    color: rgba(255,255,255,.3);
+}
 </style>
 <?= $this->endSection() ?>
 
@@ -262,7 +308,8 @@
     <div class="swiper-wrapper">
         <?php foreach($photos as $photo): ?>
         <div class="swiper-slide">
-            <img src="<?= base_url($photo['image_path']) ?>" alt="<?= esc($hero['name']) ?>">
+            <img src="<?= base_url($photo['image_path']) ?>" alt="<?= esc($hero['name']) ?>"
+                 onclick="openLightbox(this.src)" title="Clique para ver em tela cheia">
             <?php if(!empty($photo['caption'])): ?>
             <div class="photo-caption">
                 <p><?= nl2br(esc($photo['caption'])) ?></p>
@@ -555,6 +602,16 @@
 </div>
 
 </div><!-- /.hero-page-container -->
+
+<!-- ══ LIGHTBOX FULLSCREEN ══ -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox(event)" title="Fechar">&times;</button>
+    <button class="lightbox-nav prev" onclick="navLightbox(-1, event)">&lsaquo;</button>
+    <img id="lightboxImg" src="" alt="Foto em tela cheia">
+    <button class="lightbox-nav next" onclick="navLightbox(1, event)">&rsaquo;</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
 <?= $this->endSection() ?>
 
 
@@ -566,6 +623,39 @@
         navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
         pagination: { el: ".swiper-pagination", clickable: true },
         keyboard: { enabled: true }, a11y: true,
+    });
+
+    // ── Lightbox ──
+    const lbPhotos = <?= json_encode(array_map(fn($p) => base_url($p['image_path']), $photos)) ?>;
+    let lbIndex = 0;
+
+    function openLightbox(src) {
+        lbIndex = lbPhotos.indexOf(src);
+        if (lbIndex === -1) lbIndex = 0;
+        showLightboxPhoto();
+        document.getElementById('lightbox').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(e) {
+        if (e.target.tagName === 'IMG') return;
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function navLightbox(dir, e) {
+        e.stopPropagation();
+        lbIndex = (lbIndex + dir + lbPhotos.length) % lbPhotos.length;
+        showLightboxPhoto();
+    }
+    function showLightboxPhoto() {
+        document.getElementById('lightboxImg').src = lbPhotos[lbIndex];
+        document.getElementById('lightboxCounter').textContent = (lbIndex + 1) + ' / ' + lbPhotos.length;
+    }
+    document.addEventListener('keydown', function(e) {
+        const lb = document.getElementById('lightbox');
+        if (!lb.classList.contains('active')) return;
+        if (e.key === 'Escape') { lb.classList.remove('active'); document.body.style.overflow = ''; }
+        if (e.key === 'ArrowRight') navLightbox(1, e);
+        if (e.key === 'ArrowLeft') navLightbox(-1, e);
     });
 
     function toggleOtherPkgs(btn) {
