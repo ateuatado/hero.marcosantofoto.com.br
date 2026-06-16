@@ -35,7 +35,7 @@ class StudioSettingModel extends Model
     /**
      * Retorna o valor de uma configuração específica.
      */
-    public function get(string $key, string $default = ''): string
+    public function getValue(string $key, string $default = ''): string
     {
         $row = $this->where('setting_key', $key)->first();
         return $row ? ($row->setting_value ?: $default) : $default;
@@ -44,7 +44,7 @@ class StudioSettingModel extends Model
     /**
      * Atualiza o valor de uma configuração.
      */
-    public function set(string $key, string $value): bool
+    public function setValue(string $key, string $value): bool
     {
         return (bool) $this->where('setting_key', $key)->set(['setting_value' => $value])->update();
     }

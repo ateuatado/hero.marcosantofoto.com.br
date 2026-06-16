@@ -30,7 +30,7 @@ class StudioSettingController extends BaseController
         foreach ($settings as $s) {
             $newValue = $this->request->getPost($s->setting_key);
             if ($newValue !== null) {
-                $this->model->set($s->setting_key, trim($newValue));
+                $this->model->setValue($s->setting_key, trim($newValue));
             }
         }
 
