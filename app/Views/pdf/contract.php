@@ -10,7 +10,7 @@
         body {
             font-family: 'Inter', 'DejaVu Sans', Helvetica, Arial, sans-serif;
             font-size: 10.5pt;
-            line-height: 1.4;
+            line-height: 1.5;
             color: #1a1a1a;
             margin: 0;
             padding: 0;
@@ -47,37 +47,33 @@
             font-weight: bold;
             color: #111;
             margin: 0 0 6px 0;
-            text-transform: uppercase;
         }
 
         .clause-content {
             font-size: 10.5pt;
-            line-height: 1.4;
+            line-height: 1.5;
             text-align: justify;
             margin: 0;
             color: #1a1a1a;
         }
 
+        .clause-content p {
+            margin: 0 0 6px 0;
+        }
+
         .signature-section {
             margin-top: 50px;
-            page-break-inside: avoid;
         }
 
         .date-line {
-            text-align: center;
-            margin-bottom: 50px;
-            font-size: 10.5pt;
+            text-align: right;
+            font-size: 10pt;
+            margin-bottom: 30px;
+            color: #333;
         }
 
         .signatures {
-            width: 100%;
-        }
-
-        .signature-block {
-            width: 45%;
-            display: inline-block;
-            text-align: center;
-            vertical-align: top;
+            overflow: hidden;
         }
 
         .signature-block-left {
@@ -130,13 +126,23 @@
 <body>
 
     <div class="header">
-        <h1>CONTRATO DE PRESTACAO DE SERVICOS FOTOGRAFICOS</h1>
+        <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS FOTOGRÁFICOS</h1>
         <p class="contract-number">Contrato N. <?= esc($contractNumber) ?></p>
     </div>
 
+    <?php
+    // Ordinais por extenso para evitar problemas de encoding
+    $ordinais = [
+        1 => 'PRIMEIRA', 2 => 'SEGUNDA', 3 => 'TERCEIRA', 4 => 'QUARTA',
+        5 => 'QUINTA', 6 => 'SEXTA', 7 => 'SÉTIMA', 8 => 'OITAVA',
+        9 => 'NONA', 10 => 'DÉCIMA', 11 => 'DÉCIMA PRIMEIRA', 12 => 'DÉCIMA SEGUNDA',
+        13 => 'DÉCIMA TERCEIRA', 14 => 'DÉCIMA QUARTA', 15 => 'DÉCIMA QUINTA',
+    ];
+    ?>
+
     <?php foreach ($sections as $index => $section): ?>
         <div class="clause">
-            <p class="clause-title">CLAUSULA <?= ($index + 1) ?>a - <?= esc($section->title) ?></p>
+            <p class="clause-title">CLÁUSULA <?= $ordinais[$index + 1] ?? ($index + 1) . 'ª' ?> – <?= esc($section->title) ?></p>
             <div class="clause-content">
                 <?= $formatContent($section->content) ?>
             </div>
@@ -145,7 +151,7 @@
 
     <div class="signature-section">
         <p class="date-line">
-            Sao Paulo, <?= esc($contractDate) ?>
+            São Paulo, <?= esc($contractDate) ?>
         </p>
 
         <div class="signatures">
@@ -169,7 +175,7 @@
 
         <!-- Testemunhas (Art. 784, III, CPC) -->
         <div style="margin-top:50px;clear:both;">
-            <p style="font-size:9pt;color:#555;text-align:center;margin-bottom:30px;text-transform:uppercase;letter-spacing:1px;">Testemunhas</p>
+            <p style="font-size:9pt;color:#555;text-align:center;margin-bottom:30px;letter-spacing:1px;">TESTEMUNHAS</p>
 
             <div class="signatures">
                 <div class="signature-block-left">

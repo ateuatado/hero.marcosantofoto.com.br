@@ -97,7 +97,9 @@ class ContractGenerator
             $processedSections[] = $processed;
         }
 
-        $contractDate = !empty($orderData->created_at) ? date('d \d\e F \d\e Y', strtotime($orderData->created_at)) : date('d \d\e F \d\e Y');
+        $mesesPT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+        $ts = !empty($orderData->created_at) ? strtotime($orderData->created_at) : time();
+        $contractDate = date('d', $ts) . ' de ' . $mesesPT[(int)date('n', $ts) - 1] . ' de ' . date('Y', $ts);
 
         // Format content function - same as guide
         $formatContent = function (string $text): string {
