@@ -637,9 +637,37 @@
             <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">E-MAIL</label>
             <input type="email" name="email" required placeholder="seu@email.com" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
           </div>
-          <div class="mb-4">
+          <div class="mb-3">
             <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">WHATSAPP</label>
             <input type="tel" name="phone" placeholder="(00) 00000-0000" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+          </div>
+
+          <!-- Dados para o contrato -->
+          <div style="border-top:1px solid rgba(197,160,89,.12);padding-top:16px;margin-bottom:4px;">
+            <p style="font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(197,160,89,.5);margin:0 0 12px;">DADOS PARA O CONTRATO</p>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">CPF</label>
+              <input type="text" name="cpf" required placeholder="000.000.000-00" maxlength="14"
+                     oninput="let v=this.value.replace(/\D/g,'');if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);if(v.length>7)v=v.slice(0,7)+'.'+v.slice(7);if(v.length>11)v=v.slice(0,11)+'-'+v.slice(11);this.value=v.slice(0,14);"
+                     style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;font-variant-numeric:tabular-nums;">
+            </div>
+            <div style="flex:0 0 140px;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">ESTADO CIVIL</label>
+              <select name="marital_status" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:12px 12px;font-size:.85rem;outline:none;appearance:auto;">
+                <option value="">—</option>
+                <option value="Solteiro(a)">Solteiro(a)</option>
+                <option value="Casado(a)">Casado(a)</option>
+                <option value="Divorciado(a)">Divorciado(a)</option>
+                <option value="Viúvo(a)">Viúvo(a)</option>
+                <option value="União Estável">União Estável</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">ENDEREÇO</label>
+            <input type="text" name="address" placeholder="Rua, nº, bairro, cidade/UF" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
           </div>
 
           <!-- Termos do contrato -->

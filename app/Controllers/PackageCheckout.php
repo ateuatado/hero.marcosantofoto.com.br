@@ -65,6 +65,9 @@ class PackageCheckout extends BaseController
                 'buyer_phone'      => $phone,
                 'amount'           => (float) $package->base_price,
                 'status'           => 'pending',
+                'cpf'              => trim($this->request->getPost('cpf') ?? ''),
+                'marital_status'   => trim($this->request->getPost('marital_status') ?? ''),
+                'address'          => trim($this->request->getPost('address') ?? ''),
                 'accepted_terms_at'      => $this->request->getPost('accept_terms') ? date('Y-m-d H:i:s') : null,
                 'image_usage_authorized' => $this->request->getPost('image_usage') ? 1 : 0,
             ]);
