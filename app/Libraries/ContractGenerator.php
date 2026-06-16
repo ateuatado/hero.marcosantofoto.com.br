@@ -16,11 +16,20 @@ class ContractGenerator
      */
     public function generate(object $orderData): string
     {
-        $model = new ContractSectionModel();
-        $sections = $model->getActive();
+        // ── Cláusulas do contrato ─────────────────────────────────────
+        try {
+            $model = new ContractSectionModel();
+            $sections = $model->getActive();
+        } catch (\Throwable $e) {
+            $sections = [];
+        }
 
         // ── Dados do estúdio (contratado) ─────────────────────────────
-        $studio = (new StudioSettingModel())->getAll();
+        try {
+            $studio = (new StudioSettingModel())->getAll();
+        } catch (\Throwable $e) {
+            $studio = [];
+        }
         $studioAddress = implode(', ', array_filter([
             $studio['studio_address'] ?? '',
             $studio['studio_neighborhood'] ?? '',
