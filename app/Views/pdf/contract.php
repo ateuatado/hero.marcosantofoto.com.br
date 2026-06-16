@@ -154,46 +154,52 @@
             São Paulo, <?= esc($contractDate) ?>
         </p>
 
-        <div class="signatures">
-            <div class="signature-block-left">
-                <div class="signature-line">
-                    <p class="signature-name"><?= esc($ownerName) ?></p>
-                    <p class="signature-role">CONTRATADO</p>
-                    <p class="signature-cpf">CPF: <?= esc($ownerCpf) ?></p>
-                    <p class="signature-cpf"><?= esc($studioName) ?></p>
-                </div>
-            </div>
+        <p style="font-size:9.5pt;text-align:center;color:#333;margin:30px 0 5px;">E, por estarem de pleno acordo, as partes assinam o presente contrato em 2 (duas) vias de igual teor.</p>
 
-            <div class="signature-block-right">
-                <div class="signature-line">
-                    <p class="signature-name"><?= esc($clientName) ?></p>
-                    <p class="signature-role">CONTRATANTE</p>
-                    <p class="signature-cpf">CPF: <?= esc($clientCpf) ?></p>
-                </div>
+        <!-- CONTRATADO -->
+        <div style="margin-top:50px;text-align:center;">
+            <div style="width:60%;margin:0 auto;">
+                <div style="border-bottom:1px solid #333;height:40px;"></div>
+                <p style="font-size:10pt;font-weight:bold;margin:6px 0 0;"><?= esc($ownerName) ?></p>
+                <p style="font-size:9pt;color:#555;margin:2px 0 0;">CONTRATADO</p>
+                <p style="font-size:8.5pt;color:#666;margin:2px 0 0;">CPF: <?= esc($ownerCpf) ?></p>
+                <p style="font-size:8.5pt;color:#666;margin:2px 0 0;"><?= esc($studioName) ?></p>
+            </div>
+        </div>
+
+        <!-- CONTRATANTE -->
+        <div style="margin-top:40px;text-align:center;">
+            <div style="width:60%;margin:0 auto;">
+                <div style="border-bottom:1px solid #333;height:40px;"></div>
+                <p style="font-size:10pt;font-weight:bold;margin:6px 0 0;"><?= esc($clientName) ?></p>
+                <p style="font-size:9pt;color:#555;margin:2px 0 0;">CONTRATANTE</p>
+                <p style="font-size:8.5pt;color:#666;margin:2px 0 0;">CPF: <?= esc($clientCpf) ?></p>
             </div>
         </div>
 
         <!-- Testemunhas (Art. 784, III, CPC) -->
-        <div style="margin-top:50px;clear:both;">
-            <p style="font-size:9pt;color:#555;text-align:center;margin-bottom:30px;letter-spacing:1px;">TESTEMUNHAS</p>
+        <div style="margin-top:50px;">
+            <p style="font-size:9pt;color:#555;text-align:center;margin-bottom:10px;letter-spacing:1px;">TESTEMUNHAS</p>
 
-            <div class="signatures">
-                <div class="signature-block-left">
-                    <div class="signature-line">
-                        <p class="signature-name">_________________________________</p>
-                        <p class="signature-cpf">Nome:</p>
-                        <p class="signature-cpf">CPF:</p>
-                    </div>
-                </div>
-
-                <div class="signature-block-right">
-                    <div class="signature-line">
-                        <p class="signature-name">_________________________________</p>
-                        <p class="signature-cpf">Nome:</p>
-                        <p class="signature-cpf">CPF:</p>
-                    </div>
-                </div>
-            </div>
+            <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+                <tr>
+                    <td style="width:48%;vertical-align:top;padding-right:15px;">
+                        <div style="text-align:center;">
+                            <div style="border-bottom:1px solid #333;height:35px;"></div>
+                            <p style="font-size:8.5pt;color:#666;margin:6px 0 2px;">Nome: _________________________________</p>
+                            <p style="font-size:8.5pt;color:#666;margin:0;">CPF: _________________________________</p>
+                        </div>
+                    </td>
+                    <td style="width:4%;"></td>
+                    <td style="width:48%;vertical-align:top;padding-left:15px;">
+                        <div style="text-align:center;">
+                            <div style="border-bottom:1px solid #333;height:35px;"></div>
+                            <p style="font-size:8.5pt;color:#666;margin:6px 0 2px;">Nome: _________________________________</p>
+                            <p style="font-size:8.5pt;color:#666;margin:0;">CPF: _________________________________</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 
