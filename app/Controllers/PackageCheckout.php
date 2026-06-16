@@ -66,8 +66,12 @@ class PackageCheckout extends BaseController
                 'amount'           => (float) $package->base_price,
                 'status'           => 'pending',
                 'cpf'              => trim($this->request->getPost('cpf') ?? ''),
+                'rg'               => trim($this->request->getPost('rg') ?? ''),
                 'marital_status'   => trim($this->request->getPost('marital_status') ?? ''),
                 'address'          => trim($this->request->getPost('address') ?? ''),
+                'city'             => trim($this->request->getPost('city') ?? ''),
+                'state'            => trim($this->request->getPost('state') ?? ''),
+                'zip_code'         => trim($this->request->getPost('zip_code') ?? ''),
                 'accepted_terms_at'      => $this->request->getPost('accept_terms') ? date('Y-m-d H:i:s') : null,
                 'image_usage_authorized' => $this->request->getPost('image_usage') ? 1 : 0,
             ]);

@@ -136,6 +136,11 @@
                                    maxlength="14">
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label text-muted small">RG</label>
+                            <input type="text" name="rg" class="form-control bg-black text-white border-secondary"
+                                   value="<?= esc($order->rg ?? '') ?>" placeholder="00.000.000-0">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label text-muted small">Estado Civil</label>
                             <select name="marital_status" class="form-select bg-black text-white border-secondary">
                                 <option value="">Selecione...</option>

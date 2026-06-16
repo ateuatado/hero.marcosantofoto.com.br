@@ -73,12 +73,14 @@ class ContractGenerator
             // Contratante (cliente)
             '{nome_cliente}' => $orderData->buyer_name ?? 'A ser informado',
             '{cpf_cliente}' => $orderData->cpf ?? '___.___.___-__',
+            '{rg_cliente}' => $orderData->rg ?? 'a ser informado',
             '{estado_civil}' => $orderData->marital_status ?? 'a ser informado',
             '{endereco_completo}' => $fullAddress,
             '{email}' => $orderData->buyer_email ?? '',
             '{telefone}' => $orderData->buyer_phone ?? '',
             '{nome_pacote}' => $packageName,
             '{valor}' => 'R$ ' . number_format((float)($orderData->amount ?? 0), 2, ',', '.'),
+            '{valor_extenso}' => $this->valorPorExtenso((float)($orderData->amount ?? 0)),
             '{qtd_fotos}' => $includedPhotos,
             '{valor_foto_extra}' => $extraPhotoPrice,
             '{data_contratacao}' => !empty($orderData->created_at) ? date('d/m/Y', strtotime($orderData->created_at)) : date('d/m/Y'),
@@ -156,5 +158,58 @@ class ContractGenerator
         $dompdf->render();
 
         return $dompdf->output();
+    }
+
+    /**
+     * Converte valor numérico para extenso em português.
+     */
+    private function valorPorExtenso(float $valor): string
+    {
+        $inteiro = (int) floor($valor);
+        $centavos = (int) round(($valor - $inteiro) * 100);
+
+        $unidades = ['', 'um', 'dois', 'tres', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove',
+                     'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+        $dezenas  = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+        $centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos',
+                     'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+        $extenso = function (int $n) use ($unidades, $dezenas, $centenas): string {
+            if ($n === 0) return 'zero';
+            if ($n === 100) return 'cem';
+
+            $parts = [];
+            if ($n >= 100) {
+                $parts[] = $centenas[(int) floor($n / 100)];
+                $n %= 100;
+            }
+            if ($n >= 20) {
+                $parts[] = $dezenas[(int) floor($n / 10)];
+                $n %= 10;
+            }
+            if ($n > 0) {
+                $parts[] = $unidades[$n];
+            }
+            return implode(' e ', $parts);
+        };
+
+        $partes = [];
+        if ($inteiro >= 1000) {
+            $milhares = (int) floor($inteiro / 1000);
+            $partes[] = ($milhares === 1 ? 'mil' : $extenso($milhares) . ' mil');
+            $inteiro %= 1000;
+        }
+        if ($inteiro > 0) {
+            $partes[] = $extenso($inteiro);
+        }
+
+        $resultado = implode(' e ', $partes);
+        $resultado .= ($valor >= 2 || $valor < 1) ? ' reais' : ' real';
+
+        if ($centavos > 0) {
+            $resultado .= ' e ' . $extenso($centavos) . ($centavos > 1 ? ' centavos' : ' centavo');
+        }
+
+        return $resultado;
     }
 }

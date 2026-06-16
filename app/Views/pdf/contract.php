@@ -166,6 +166,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Testemunhas (Art. 784, III, CPC) -->
+        <div style="margin-top:50px;clear:both;">
+            <p style="font-size:9pt;color:#555;text-align:center;margin-bottom:30px;text-transform:uppercase;letter-spacing:1px;">Testemunhas</p>
+
+            <div class="signatures">
+                <div class="signature-block-left">
+                    <div class="signature-line">
+                        <p class="signature-name">_________________________________</p>
+                        <p class="signature-cpf">Nome:</p>
+                        <p class="signature-cpf">CPF:</p>
+                    </div>
+                </div>
+
+                <div class="signature-block-right">
+                    <div class="signature-line">
+                        <p class="signature-name">_________________________________</p>
+                        <p class="signature-cpf">Nome:</p>
+                        <p class="signature-cpf">CPF:</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="footer">

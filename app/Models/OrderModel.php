@@ -26,6 +26,7 @@ class OrderModel extends Model
         'mp_raw',
         // Dados contratuais
         'cpf',
+        'rg',
         'marital_status',
         'address',
         'city',

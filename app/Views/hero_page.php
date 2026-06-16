@@ -653,9 +653,13 @@
                      oninput="let v=this.value.replace(/\D/g,'');if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);if(v.length>7)v=v.slice(0,7)+'.'+v.slice(7);if(v.length>11)v=v.slice(0,11)+'-'+v.slice(11);this.value=v.slice(0,14);"
                      style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;font-variant-numeric:tabular-nums;">
             </div>
-            <div style="flex:0 0 140px;">
+            <div style="flex:1;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">RG</label>
+              <input type="text" name="rg" placeholder="00.000.000-0" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+            </div>
+            <div style="flex:0 0 130px;">
               <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">ESTADO CIVIL</label>
-              <select name="marital_status" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:12px 12px;font-size:.85rem;outline:none;appearance:auto;">
+              <select name="marital_status" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:12px 10px;font-size:.85rem;outline:none;appearance:auto;">
                 <option value="">—</option>
                 <option value="Solteiro(a)">Solteiro(a)</option>
                 <option value="Casado(a)">Casado(a)</option>
@@ -665,9 +669,31 @@
               </select>
             </div>
           </div>
-          <div class="mb-4">
-            <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">ENDEREÇO</label>
-            <input type="text" name="address" placeholder="Rua, nº, bairro, cidade/UF" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+          <div style="display:flex;gap:10px;margin-bottom:12px;">
+            <div style="flex:0 0 120px;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">CEP</label>
+              <input type="text" name="zip_code" id="heroZip" placeholder="00000-000" maxlength="9"
+                     oninput="let v=this.value.replace(/\D/g,'');if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5);this.value=v.slice(0,9);if(v.replace('-','').length===8)fetchCep(v.replace('-',''),'hero');"
+                     style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;font-variant-numeric:tabular-nums;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">ENDEREÇO</label>
+              <input type="text" name="address" id="heroAddr" placeholder="Rua, nº, complemento" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <div style="flex:1;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">BAIRRO</label>
+              <input type="text" name="neighborhood" id="heroNeigh" placeholder="Bairro" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">CIDADE</label>
+              <input type="text" name="city" id="heroCity" placeholder="Cidade" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;">
+            </div>
+            <div style="flex:0 0 60px;">
+              <label style="font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:8px;">UF</label>
+              <input type="text" name="state" id="heroState" placeholder="SP" maxlength="2" style="width:100%;background:#000;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;font-size:.95rem;outline:none;text-transform:uppercase;">
+            </div>
           </div>
 
           <!-- Termos do contrato -->
@@ -739,6 +765,25 @@
 
 <?= $this->section('scripts') ?>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // ── ViaCEP auto-fill ──
+    function fetchCep(cep, prefix) {
+        fetch('https://viacep.com.br/ws/' + cep + '/json/')
+            .then(r => r.json())
+            .then(d => {
+                if (!d.erro) {
+                    const addr = document.getElementById(prefix + 'Addr');
+                    const neigh = document.getElementById(prefix + 'Neigh');
+                    const city = document.getElementById(prefix + 'City');
+                    const state = document.getElementById(prefix + 'State');
+                    if (addr && !addr.value) addr.value = d.logradouro || '';
+                    if (neigh) neigh.value = d.bairro || '';
+                    if (city) city.value = d.localidade || '';
+                    if (state) state.value = d.uf || '';
+                }
+            }).catch(() => {});
+    }
+</script>
 <script>
     var swiper = new Swiper(".mySwiper", {
         loop: true, speed: 700,
