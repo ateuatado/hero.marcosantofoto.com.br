@@ -151,8 +151,10 @@
         <div class="signatures">
             <div class="signature-block-left">
                 <div class="signature-line">
-                    <p class="signature-name">Marco Santo Fotografia</p>
+                    <p class="signature-name"><?= esc($ownerName) ?></p>
                     <p class="signature-role">CONTRATADO</p>
+                    <p class="signature-cpf">CPF: <?= esc($ownerCpf) ?></p>
+                    <p class="signature-cpf"><?= esc($studioName) ?></p>
                 </div>
             </div>
 
@@ -167,7 +169,7 @@
     </div>
 
     <div class="footer">
-        Marco Santo Fotografia &mdash; Contrato N. <?= esc($contractNumber) ?>
+        <?= esc($studioName) ?> &mdash; Contrato N. <?= esc($contractNumber) ?>
     </div>
 
 </body>

@@ -49,6 +49,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-info" href="<?= site_url('admin/client-projects') ?>">Projetos de Clientes</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-info" href="<?= site_url('admin/studio') ?>">Estúdio</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

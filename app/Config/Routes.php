@@ -86,6 +86,10 @@ $routes->group('admin', ['filter' => 'group:admin,superadmin'], static function 
     $routes->get( 'contract-sections/(:num)/edit',  'Admin\ContractSectionController::edit/$1');
     $routes->post('contract-sections/(:num)/update','Admin\ContractSectionController::update/$1');
     $routes->post('contract-sections/(:num)/delete','Admin\ContractSectionController::delete/$1');
+
+    // Dados do Estúdio
+    $routes->get( 'studio',        'Admin\StudioSettingController::index');
+    $routes->post('studio/update', 'Admin\StudioSettingController::update');
 });
 
 // ─── Agenda Proxy (resolve CORS/SSL server-side) ──────────────────────────────

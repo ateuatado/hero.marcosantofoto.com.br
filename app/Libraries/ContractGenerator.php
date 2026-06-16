@@ -4,6 +4,7 @@ namespace App\Libraries;
 
 use App\Models\ContractSectionModel;
 use App\Models\PackageModel;
+use App\Models\StudioSettingModel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -18,6 +19,15 @@ class ContractGenerator
         $model = new ContractSectionModel();
         $sections = $model->getActive();
 
+        // ── Dados do estúdio (contratado) ─────────────────────────────
+        $studio = (new StudioSettingModel())->getAll();
+        $studioAddress = implode(', ', array_filter([
+            $studio['studio_address'] ?? '',
+            $studio['studio_neighborhood'] ?? '',
+            $studio['studio_city'] ?? '',
+            ($studio['studio_state'] ?? '') ? strtoupper($studio['studio_state']) : '',
+        ]));
+
         // Get package info
         $packageName = 'Ensaio Fotografico';
         $includedPhotos = '';
@@ -31,7 +41,7 @@ class ContractGenerator
             }
         }
 
-        // Build address
+        // Build client address
         $addressParts = array_filter([
             $orderData->address ?? '',
             $orderData->city ?? '',
@@ -42,6 +52,16 @@ class ContractGenerator
 
         // Placeholder replacements
         $replacements = [
+            // Contratado (fotógrafo)
+            '{contratado_nome}'      => $studio['owner_full_name'] ?? 'Marco Santo Fotografia',
+            '{contratado_cpf}'       => $studio['owner_cpf'] ?? '',
+            '{contratado_estado_civil}' => $studio['owner_marital_status'] ?? '',
+            '{contratado_endereco}'  => $studioAddress,
+            '{contratado_email}'     => $studio['studio_email'] ?? '',
+            '{contratado_telefone}'  => $studio['studio_phone'] ?? '',
+            '{nome_estudio}'         => $studio['studio_name'] ?? 'Marco Santo Fotografia',
+
+            // Contratante (cliente)
             '{nome_cliente}' => $orderData->buyer_name ?? 'A ser informado',
             '{cpf_cliente}' => $orderData->cpf ?? '___.___.___-__',
             '{estado_civil}' => $orderData->marital_status ?? 'a ser informado',
@@ -83,12 +103,15 @@ class ContractGenerator
         };
 
         $html = view('pdf/contract', [
-            'sections' => $processedSections,
-            'contractDate' => $contractDate,
+            'sections'       => $processedSections,
+            'contractDate'   => $contractDate,
             'contractNumber' => $replacements['{numero_contrato}'],
-            'clientName' => $replacements['{nome_cliente}'],
-            'clientCpf' => $replacements['{cpf_cliente}'],
-            'formatContent' => $formatContent,
+            'clientName'     => $replacements['{nome_cliente}'],
+            'clientCpf'      => $replacements['{cpf_cliente}'],
+            'studioName'     => $replacements['{nome_estudio}'],
+            'ownerName'      => $replacements['{contratado_nome}'],
+            'ownerCpf'       => $replacements['{contratado_cpf}'],
+            'formatContent'  => $formatContent,
         ]);
 
         $options = new Options();

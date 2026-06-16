@@ -13,7 +13,7 @@ class ContractSectionSeeder extends Seeder
         $sections = [
             [
                 'title'         => 'DAS PARTES',
-                'content'       => "CONTRATADO: Marco Santo, pessoa fisica, com estudio na Lapa, Sao Paulo/SP.\n\nCONTRATANTE: {nome_cliente}, CPF: {cpf_cliente}, {estado_civil}, residente em {endereco_completo}, e-mail: {email}, telefone: {telefone}.",
+                'content'       => "CONTRATADO: {contratado_nome}, CPF: {contratado_cpf}, {contratado_estado_civil}, com estudio em {contratado_endereco}.\n\nCONTRATANTE: {nome_cliente}, CPF: {cpf_cliente}, {estado_civil}, residente em {endereco_completo}, e-mail: {email}, telefone: {telefone}.",
                 'display_order' => 10,
             ],
             [
