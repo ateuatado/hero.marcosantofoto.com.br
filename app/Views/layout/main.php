@@ -79,6 +79,117 @@
         a:hover .hero-card-img { transform: scale(1.05); }
     </style>
 
+    <!-- SEO: Meta Tags -->
+    <meta name="description" content="<?= esc($metaDescription ?? 'Estúdio fotográfico na Lapa, São Paulo. Ensaios de branding pessoal, retratos profissionais e fotografia autoral. Pacotes personalizados com entrega digital em alta resolução.') ?>">
+    <meta name="author" content="Marco Santo Fotografia">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="<?= current_url() ?>">
+
+    <!-- SEO: Geo Tags (Local) -->
+    <meta name="geo.region" content="BR-SP">
+    <meta name="geo.placename" content="Lapa, São Paulo">
+    <meta name="geo.position" content="-23.5205;-46.7015">
+    <meta name="ICBM" content="-23.5205, -46.7015">
+
+    <!-- Open Graph (Facebook / WhatsApp) -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="Marco Santo Fotografia">
+    <meta property="og:title" content="<?= esc($ogTitle ?? $title ?? 'Marco Santo | Fotografia de Alta Performance') ?>">
+    <meta property="og:description" content="<?= esc($ogDescription ?? $metaDescription ?? 'Ensaios fotográficos em estúdio na Lapa, São Paulo. Branding pessoal, retratos profissionais e fotografia autoral.') ?>">
+    <meta property="og:url" content="<?= current_url() ?>">
+    <?php if (!empty($ogImage)): ?>
+    <meta property="og:image" content="<?= esc($ogImage) ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <?php endif; ?>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= esc($ogTitle ?? $title ?? 'Marco Santo Fotografia') ?>">
+    <meta name="twitter:description" content="<?= esc($ogDescription ?? $metaDescription ?? 'Ensaios fotográficos em estúdio na Lapa, São Paulo.') ?>">
+
+    <!-- Schema.org: LocalBusiness + Photographer -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["LocalBusiness", "PhotographAction"],
+        "@id": "https://hero.marcosantofoto.com.br/#business",
+        "name": "Marco Santo Fotografia",
+        "alternateName": "Marco Santo Foto",
+        "description": "Estúdio fotográfico na Lapa, São Paulo, especializado em ensaios de branding pessoal, retratos profissionais e fotografia autoral.",
+        "url": "https://hero.marcosantofoto.com.br",
+        "telephone": "+5511964322103",
+        "email": "contato@marcosantofoto.com.br",
+        "image": "https://hero.marcosantofoto.com.br/assets/img/logo.png",
+        "priceRange": "$$",
+        "currenciesAccepted": "BRL",
+        "paymentAccepted": "Pix, Cartão de Crédito, Cartão de Débito",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rua Domingos Rodrigues, 242, Sala 31",
+            "addressLocality": "São Paulo",
+            "addressRegion": "SP",
+            "postalCode": "05075-010",
+            "addressCountry": "BR",
+            "areaServed": {
+                "@type": "City",
+                "name": "São Paulo"
+            }
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": -23.5205,
+            "longitude": -46.7015
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+                "opens": "09:00",
+                "closes": "18:00"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Saturday",
+                "opens": "09:00",
+                "closes": "14:00"
+            }
+        ],
+        "founder": {
+            "@type": "Person",
+            "name": "Marcos Vieira dos Santos",
+            "jobTitle": "Fotógrafo",
+            "knowsAbout": ["Branding Pessoal", "Retrato Profissional", "Fotografia Autoral"]
+        },
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Pacotes de Ensaio Fotográfico",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Ensaio Fotográfico Profissional",
+                        "description": "Sessão fotográfica em estúdio com entrega digital em alta resolução"
+                    }
+                }
+            ]
+        },
+        "sameAs": [
+            "https://www.instagram.com/marcosantofoto",
+            "https://www.marcosantofoto.com.br"
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5",
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": "1"
+        }
+    }
+    </script>
+
     <?= $this->renderSection('styles') ?>
 </head>
 <body>
