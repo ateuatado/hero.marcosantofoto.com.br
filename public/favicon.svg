@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Marco Santo — Monograma MS (Ícone / Favicon) -->
+<!-- Usado para: favicon, perfil Instagram, watermark, selo -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="120" height="120" fill="#000000"/>
+
+  <!-- Moldura fina dourada -->
+  <rect x="8" y="8" width="104" height="104"
+        fill="none" stroke="#C5A059" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- Monograma MS — EB Garamond -->
+  <text x="60" y="72" text-anchor="middle"
+        font-family="'EB Garamond', Georgia, serif"
+        font-weight="500"
+        font-size="42"
+        letter-spacing="3"
+        fill="#C5A059">MS</text>
+</svg>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Marco Santo — Watermark para fotos (branco, 15% opacidade) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&amp;family=Inter:wght@300&amp;display=swap');
+    </style>
+  </defs>
+
+  <g opacity="0.15">
+    <!-- MARCO SANTO -->
+    <text x="200" y="45" text-anchor="middle"
+          font-family="'EB Garamond', Georgia, serif"
+          font-weight="500"
+          font-size="28"
+          letter-spacing="8"
+          fill="#FFFFFF">MARCO SANTO</text>
+
+    <!-- Linha -->
+    <line x1="110" y1="58" x2="290" y2="58"
+          stroke="#FFFFFF" stroke-width="0.5"/>
+
+    <!-- FOTOGRAFIA -->
+    <text x="200" y="78" text-anchor="middle"
+          font-family="'Inter', sans-serif"
+          font-weight="300"
+          font-size="9"
+          letter-spacing="7"
+          fill="#FFFFFF">FOTOGRAFIA</text>
+  </g>
+</svg>

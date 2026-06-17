@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Marco Santo Foto — Exportar PNGs</title>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body { background: #111; color: #ccc; font-family: 'Inter', sans-serif; padding: 40px; }
+        h1 { color: #C5A059; font-family: 'EB Garamond', serif; font-weight: 500; letter-spacing: 0.15em; font-size: 1.6rem; }
+        .grid { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 30px; }
+        .preview { background: #0a0a0a; border: 1px solid #222; padding: 24px; text-align: center; min-width: 280px; flex: 1; }
+        .preview img { max-width: 100%; height: auto; display: block; margin: 0 auto 12px; }
+        .preview canvas { display: none; }
+        a.btn { color: #C5A059; text-decoration: none; display: inline-block; margin-top: 8px;
+            border: 1px solid #C5A059; padding: 6px 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+            font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        a.btn:hover { background: #C5A059; color: #000; }
+        .label { font-size: 9px; color: #555; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; font-family: 'Inter', sans-serif; }
+        .checkerboard { background-image: repeating-conic-gradient(#1a1a1a 0% 25%, #222 0% 50%); background-size: 16px 16px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Marco Santo Fotografia — Exportar PNGs</h1>
+    <p style="color:#555;font-size:12px;letter-spacing:0.08em;">Clique em "Baixar PNG" para salvar cada versão em alta resolução (2x).</p>
+
+    <div class="grid" id="exports"></div>
+
+    <script>
+    const logos = [
+        { src: 'ms-logo/primary/ms-vertical-gold-on-black.svg', name: 'ms-vertical-gold-on-black', label: 'Primário (Ouro sobre Preto)', w: 1200, h: 400 },
+        { src: 'ms-logo/horizontal/ms-horizontal-gold-on-black.svg', name: 'ms-horizontal-gold-on-black', label: 'Horizontal', w: 1400, h: 160 },
+        { src: 'ms-logo/icon/ms-monogram-gold.svg', name: 'ms-monogram-gold', label: 'Monograma MS (Ícone)', w: 400, h: 400 },
+        { src: 'ms-logo/monochrome/ms-white-on-transparent.svg', name: 'ms-white-on-transparent', label: 'Branco (Fundo Transparente)', w: 1200, h: 400, checker: true },
+        { src: 'ms-logo/monochrome/ms-black-on-transparent.svg', name: 'ms-black-on-transparent', label: 'Preto (Fundo Transparente)', w: 1200, h: 400, checker: true },
+        { src: 'ms-logo/watermark/ms-watermark-white-15pct.svg', name: 'ms-watermark-white-15pct', label: 'Marca d\'água (15% opacidade)', w: 800, h: 200 },
+    ];
+
+    const container = document.getElementById('exports');
+
+    logos.forEach(logo => {
+        const div = document.createElement('div');
+        div.className = 'preview';
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = logo.label;
+        div.appendChild(label);
+
+        const imgWrap = document.createElement('div');
+        if (logo.checker) imgWrap.className = 'checkerboard';
+        const img = document.createElement('img');
+        img.src = logo.src;
+        imgWrap.appendChild(img);
+        div.appendChild(imgWrap);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = logo.w;
+        canvas.height = logo.h;
+        div.appendChild(canvas);
+
+        const link = document.createElement('a');
+        link.className = 'btn';
+        link.textContent = 'Baixar PNG';
+        link.href = '#';
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const ctx = canvas.getContext('2d');
+            const svgImg = new Image();
+            svgImg.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(svgImg, 0, 0, canvas.width, canvas.height);
+                const pngUrl = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = pngUrl;
+                a.download = logo.name + '.png';
+                a.click();
+            };
+            svgImg.src = logo.src;
+        });
+        div.appendChild(link);
+        container.appendChild(div);
+    });
+    </script>
+</body>
+</html>

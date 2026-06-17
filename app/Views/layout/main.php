@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Marco Santo | Fotografia de Alta Performance') ?></title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -195,8 +197,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
         <div class="container">
-            <a class="navbar-brand" href="<?= site_url('/') ?>">
-                Marco Santo <span class="nav-sub">Alta Performance</span>
+            <a class="navbar-brand d-flex align-items-center" href="<?= site_url('/') ?>" style="gap:0;flex-direction:column;line-height:1.2;">
+                <span style="font-family:'EB Garamond',serif;font-weight:500;font-size:1.15rem;letter-spacing:0.22em;color:#C5A059;">MARCO SANTO</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:300;font-size:0.5rem;letter-spacing:0.55em;color:rgba(197,160,89,0.55);text-transform:uppercase;">Fotografia</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPublic" aria-controls="navPublic" aria-expanded="false" aria-label="Toggle navigation">
@@ -235,7 +238,7 @@
 
     <footer style="background:#000; border-top: 1px solid rgba(197,160,89,0.15); padding: 2rem 0; text-align: center;">
         <p style="margin:0; font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:300; letter-spacing:0.15em; color:rgba(255,255,255,0.3); text-transform:uppercase;">
-            &copy; <?= date('Y') ?> Marco Santo &mdash; Todos os direitos reservados
+            &copy; <?= date('Y') ?> <span style="font-family:'EB Garamond',serif;font-weight:500;letter-spacing:0.2em;">Marco Santo</span> &mdash; Todos os direitos reservados
         </p>
         <p style="margin:0.4rem 0 0; font-family:'Inter',sans-serif; font-size:0.62rem; font-weight:300; letter-spacing:0.08em; color:rgba(197,160,89,0.4);">
             Reprodução proibida sem autorização expressa

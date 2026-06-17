@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Marco Santo Fotografia — Logo Horizontal (Gold on Black) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 80" width="700" height="80">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&amp;family=Inter:wght@300&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="700" height="80" fill="#000000"/>
+
+  <!-- MARCO SANTO — EB Garamond 500 -->
+  <text x="30" y="48" text-anchor="start"
+        font-family="'EB Garamond', Georgia, serif"
+        font-weight="500"
+        font-size="30"
+        letter-spacing="8"
+        fill="#C5A059">MARCO SANTO</text>
+
+  <!-- Linha vertical separadora -->
+  <line x1="370" y1="20" x2="370" y2="60"
+        stroke="#C5A059" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- FOTOGRAFIA — Inter 300 -->
+  <text x="390" y="46" text-anchor="start"
+        font-family="'Inter', sans-serif"
+        font-weight="300"
+        font-size="10"
+        letter-spacing="7"
+        fill="#C5A059"
+        opacity="0.6">FOTOGRAFIA</text>
+</svg>
